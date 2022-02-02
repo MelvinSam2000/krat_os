@@ -2,16 +2,14 @@
 #![no_main]
 
 use core::panic::PanicInfo;
-use core::arch::asm;
+use core::arch::global_asm;
 
-#[no_mangle]
-unsafe extern "C"
-fn _start() {
-    asm!("nop");
-    kmain();
-}
+use uart::Uart;
+
+global_asm!(include_str!("asm/boot.asm"));
 
 #[panic_handler]
+#[no_mangle]
 extern "C" 
 fn panic_handler(_info: &PanicInfo) -> ! {
     loop {}
@@ -20,5 +18,9 @@ fn panic_handler(_info: &PanicInfo) -> ! {
 #[no_mangle]
 extern "C"
 fn kmain() {
+
+    Uart::write_str("Hello World!\n");
     loop {}
 }
+
+pub mod uart;
