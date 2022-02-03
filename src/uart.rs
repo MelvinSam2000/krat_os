@@ -1,25 +1,27 @@
 use uart_16550::MmioSerialPort;
+use lazy_static::lazy_static;
+use spin::Mutex;
 
-pub struct Uart{
-    uart_hndl: MmioSerialPort
-}
-
+use core::fmt::Arguments;
 use core::fmt::Error;
+use core::fmt::Write;
 
 const UART_BASE_ADDR: usize = 0x1000_0000;
 
-impl Uart {
-
-    pub fn new() -> Self {
+lazy_static! {
+    static ref UART_HNDL: Mutex<MmioSerialPort> = {
         let mut uart_hndl = unsafe { MmioSerialPort::new(UART_BASE_ADDR) };
         uart_hndl.init();
-        Self { uart_hndl }
-    }
-    
-    pub fn write_str(&mut self, msg: &str) -> Result<(), Error> { 
-        for ch in msg.bytes() {
-            self.uart_hndl.send(ch);
-        }
-        Ok(())
-    }
+        Mutex::new(uart_hndl)
+    };
+}
+
+pub fn write_str(msg: &str) -> Result<(), Error> { 
+    UART_HNDL.lock().write_str(msg)?;
+    Ok(())
+}
+
+pub fn write_fmt(args: Arguments) -> Result<(), Error> {
+    UART_HNDL.lock().write_fmt(args)?;
+    Ok(())
 }
