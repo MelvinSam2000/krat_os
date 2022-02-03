@@ -13,3 +13,4 @@ panic = "abort" # disable stack unwinding on panic
 
 
 [dependencies]
+uart_16550 = "0.2.16"

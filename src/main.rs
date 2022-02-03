@@ -7,6 +7,7 @@ use core::arch::global_asm;
 use uart::Uart;
 
 global_asm!(include_str!("asm/boot.asm"));
+global_asm!(include_str!("asm/trap.asm"));
 
 #[panic_handler]
 #[no_mangle]
@@ -19,7 +20,8 @@ fn panic_handler(_info: &PanicInfo) -> ! {
 extern "C"
 fn kmain() {
 
-    Uart::write_str("Hello World!\n");
+    let mut uart = Uart::new();
+    uart.write_str("It works! :D\n").unwrap();
     loop {}
 }
 
