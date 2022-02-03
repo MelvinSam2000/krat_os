@@ -12,8 +12,7 @@ global_asm!(include_str!("asm/trap.asm"));
 extern "C" 
 fn panic_handler(info: &PanicInfo) -> ! {
     uart::write_str("FATAL - Kernel Panic:\n").unwrap();
-    uart::write_fmt(format_args!("{}", info)).unwrap();
-    uart::write_str("\n").unwrap();
+    uart::write_fmt(format_args!("{}\n", info)).unwrap();
     loop {}
 }
 
