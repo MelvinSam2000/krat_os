@@ -5,6 +5,7 @@ use core::panic::PanicInfo;
 use core::arch::global_asm;
 
 global_asm!(include_str!("asm/boot.asm"));
+global_asm!(include_str!("asm/mem.asm"));
 global_asm!(include_str!("asm/trap.asm"));
 
 #[panic_handler]
@@ -25,3 +26,4 @@ fn kmain() {
 }
 
 pub mod uart;
+pub mod pages;

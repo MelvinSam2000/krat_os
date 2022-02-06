@@ -27,12 +27,10 @@ SECTIONS
         PROVIDE(_text_end = .);
     } >RAM AT>RAM :text
 
-    PROVIDE(_global_pointer = .);
-
     .rodata : ALIGN(8)
     {
+        PROVIDE(_global_pointer = .);
         PROVIDE(_rodata_start = .);
-        *(.rodata.init) 
         *(.rodata .rodata.*)
         PROVIDE(_rodata_end = .);
     } >RAM AT>RAM :rodata
@@ -40,7 +38,6 @@ SECTIONS
     .data : ALIGN(8)
     {
         PROVIDE(_data_start = .);
-        *(.data.init) 
         *(.data .data.*)
         PROVIDE(_data_end = .);
     } >RAM AT>RAM :data
@@ -48,7 +45,6 @@ SECTIONS
     .bss : ALIGN(8)
     {
         PROVIDE(_bss_start = .);
-        *(.bss.init) 
         *(.bss .bss.*)
         PROVIDE(_bss_end = .);
     } >RAM AT>RAM :bss
