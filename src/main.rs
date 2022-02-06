@@ -4,6 +4,8 @@
 use core::panic::PanicInfo;
 use core::arch::global_asm;
 
+use crate::pages::allocator::PhysicalPageAllocator;
+
 global_asm!(include_str!("asm/boot.asm"));
 global_asm!(include_str!("asm/mem.asm"));
 global_asm!(include_str!("asm/trap.asm"));
@@ -22,6 +24,8 @@ extern "C"
 fn kmain() {
 
     uart::write_str("It works! :D\n").unwrap();
+    let p_alloc = PhysicalPageAllocator::new();
+    p_alloc.print_pages();
     loop {}
 }
 

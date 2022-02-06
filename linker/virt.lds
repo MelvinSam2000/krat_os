@@ -1,6 +1,10 @@
 OUTPUT_ARCH("riscv")
 ENTRY(_start)
 
+MEM_SIZE = 256M;
+STACK_SIZE = 1M;
+UPAGES_SIZE = 64M;
+
 PHDRS
 {
     text PT_LOAD;
@@ -11,7 +15,7 @@ PHDRS
 
 MEMORY
 {
-    RAM (wxa) : ORIGIN = 0x80000000, LENGTH = 256M
+    RAM (wxa) : ORIGIN = 0x80000000, LENGTH = MEM_SIZE
 }
 
 SECTIONS
@@ -50,8 +54,9 @@ SECTIONS
     } >RAM AT>RAM :bss
 
     PROVIDE(_kstack_start = _bss_end);
-    PROVIDE(_kstack_end = _kstack_start + 0x100000);
+    PROVIDE(_kstack_end = _kstack_start + STACK_SIZE);
 
-    PROVIDE(_heap_start = _kstack_end);
-    PROVIDE(_heap_end = _memory_end);
+    . = ALIGN(4K);
+    PROVIDE(_upages_start = _kstack_end);
+    PROVIDE(_upages_end = _upages_start + UPAGES_SIZE);
 }

@@ -33,8 +33,8 @@ KSTACK_START: .dword _kstack_start
 .global KSTACK_END
 KSTACK_END: .dword _kstack_end
 
-.global HEAP_START
-HEAP_START: .dword _heap_start
+.global UPAGES_START
+UPAGES_START: .dword _upages_start
 
-.global HEAP_END
-HEAP_END: .dword _heap_end
+.global UPAGES_END
+UPAGES_END: .dword _upages_end
