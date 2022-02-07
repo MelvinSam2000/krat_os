@@ -19,14 +19,14 @@ MEMORY
 }
 
 SECTIONS
-{ 
+{
     PROVIDE(_memory_start = ORIGIN(RAM));
     PROVIDE(_memory_end = ORIGIN(RAM) + LENGTH(RAM));
 
     .text : ALIGN(8)
     {
         PROVIDE(_text_start = .);
-        *(.text.init) 
+        *(.text.init)
         *(.text .text.*)
         PROVIDE(_text_end = .);
     } >RAM AT>RAM :text
@@ -56,7 +56,7 @@ SECTIONS
     PROVIDE(_kstack_start = _bss_end);
     PROVIDE(_kstack_end = _kstack_start + STACK_SIZE);
 
-    . = ALIGN(4K);
-    PROVIDE(_upages_start = _kstack_end);
+    . = ALIGN(4096);
+    PROVIDE(_upages_start = .);
     PROVIDE(_upages_end = _upages_start + UPAGES_SIZE);
 }

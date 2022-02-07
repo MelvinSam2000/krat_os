@@ -24,10 +24,17 @@ extern "C"
 fn kmain() {
 
     uart_print!("It works! :D\n");
-    let p_alloc = PhysicalPageAllocator::new();
-    p_alloc.print_pages();
+    unsafe {
+        let mut p_alloc = PhysicalPageAllocator::new();
+        let p1 = p_alloc.alloc().unwrap();
+        let p2 = p_alloc.alloc().unwrap();
+        uart_print!("P1 0x{:x}\n", p1 as usize);
+        uart_print!("P2 0x{:x}\n", p2 as usize);
+        p_alloc.dealloc(p1).unwrap();
+    }
     loop {}
 }
 
+pub mod debug;
 pub mod uart;
 pub mod pages;

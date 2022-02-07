@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables)]
 use bitflags::bitflags;
 
 bitflags! {
@@ -18,6 +19,7 @@ bitflags! {
 
 const PAGE_TABLE_CAPACITY: usize = 1 << 9;
 
+#[repr(C)]
 pub struct PageTable {
     pages: [PageTableEntry; PAGE_TABLE_CAPACITY],
 }

@@ -22,10 +22,3 @@ pub fn write_str(msg: &str) {
 pub fn write_fmt(args: Arguments) {
     UART_HNDL.lock().write_fmt(args).unwrap();
 }
-
-#[macro_export]
-macro_rules! uart_print {
-    ($($arg:tt)*) => {
-        $crate::uart::write_fmt(format_args!($($arg)*));
-    };
-}
