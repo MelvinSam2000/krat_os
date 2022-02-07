@@ -14,8 +14,8 @@ global_asm!(include_str!("asm/trap.asm"));
 #[no_mangle]
 extern "C" 
 fn panic_handler(info: &PanicInfo) -> ! {
-    uart::write_str("FATAL - Kernel Panic:\n").unwrap();
-    uart::write_fmt(format_args!("{}\n", info)).unwrap();
+    uart_print!("FATAL - Kernel Panic:\n");
+    uart_print!("{}\n", info);
     loop {}
 }
 
@@ -23,7 +23,7 @@ fn panic_handler(info: &PanicInfo) -> ! {
 extern "C"
 fn kmain() {
 
-    uart::write_str("It works! :D\n").unwrap();
+    uart_print!("It works! :D\n");
     let p_alloc = PhysicalPageAllocator::new();
     p_alloc.print_pages();
     loop {}

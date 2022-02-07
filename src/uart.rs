@@ -3,7 +3,6 @@ use lazy_static::lazy_static;
 use spin::Mutex;
 
 use core::fmt::Arguments;
-use core::fmt::Error;
 use core::fmt::Write;
 
 const UART_BASE_ADDR: usize = 0x1000_0000;
@@ -16,12 +15,17 @@ lazy_static! {
     };
 }
 
-pub fn write_str(msg: &str) -> Result<(), Error> { 
-    UART_HNDL.lock().write_str(msg)?;
-    Ok(())
+pub fn write_str(msg: &str) { 
+    UART_HNDL.lock().write_str(msg).unwrap();
 }
 
-pub fn write_fmt(args: Arguments) -> Result<(), Error> {
-    UART_HNDL.lock().write_fmt(args)?;
-    Ok(())
+pub fn write_fmt(args: Arguments) {
+    UART_HNDL.lock().write_fmt(args).unwrap();
+}
+
+#[macro_export]
+macro_rules! uart_print {
+    ($($arg:tt)*) => {
+        $crate::uart::write_fmt(format_args!($($arg)*));
+    };
 }
