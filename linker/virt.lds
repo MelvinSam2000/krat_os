@@ -2,8 +2,7 @@ OUTPUT_ARCH("riscv")
 ENTRY(_start)
 
 MEM_SIZE = 256M;
-STACK_SIZE = 1M;
-UPAGES_SIZE = 64M;
+STACK_SIZE = 4K;
 
 PHDRS
 {
@@ -57,6 +56,6 @@ SECTIONS
     PROVIDE(_kstack_end = _kstack_start + STACK_SIZE);
 
     . = ALIGN(4096);
-    PROVIDE(_upages_start = .);
-    PROVIDE(_upages_end = _upages_start + UPAGES_SIZE);
+    PROVIDE(_umemory_start = .);
+    PROVIDE(_umemory_end = _memory_end);
 }

@@ -44,4 +44,4 @@ pub fn virt_to_phys(virt: usize) -> usize {
     unimplemented!();
 }
 
-pub mod allocator;
+pub mod palloc;
