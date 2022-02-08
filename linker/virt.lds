@@ -2,7 +2,8 @@ OUTPUT_ARCH("riscv")
 ENTRY(_start)
 
 MEM_SIZE = 256M;
-STACK_SIZE = 4K;
+KSTACK_SIZE = 4K;
+KHEAP_SIZE = 8K;
 
 PHDRS
 {
@@ -52,8 +53,13 @@ SECTIONS
         PROVIDE(_bss_end = .);
     } >RAM AT>RAM :bss
 
+    . = ALIGN(4096);
     PROVIDE(_kstack_start = _bss_end);
-    PROVIDE(_kstack_end = _kstack_start + STACK_SIZE);
+    PROVIDE(_kstack_end = _kstack_start + KSTACK_SIZE);
+
+    . = ALIGN(4096);
+    PROVIDE(_kheap_start = _kstack_end);
+    PROVIDE(_kheap_end = _kheap_start + KHEAP_SIZE);
 
     . = ALIGN(4096);
     PROVIDE(_umemory_start = .);
