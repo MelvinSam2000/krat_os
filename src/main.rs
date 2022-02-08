@@ -1,8 +1,13 @@
 #![no_std]
 #![no_main]
+#![feature(alloc_error_handler)]
+
+extern crate alloc;
 
 use core::panic::PanicInfo;
 use core::arch::global_asm;
+
+use alloc::alloc::Layout;
 
 global_asm!(include_str!("asm/boot.asm"));
 global_asm!(include_str!("asm/mem.asm"));
@@ -17,14 +22,20 @@ fn panic_handler(info: &PanicInfo) -> ! {
     loop {}
 }
 
+#[alloc_error_handler]
+fn alloc_error_handler(layout: Layout) -> ! {
+    panic!("Allocation error: {:?}", layout);
+}
+
 #[no_mangle]
 extern "C"
 fn kmain() {
-
-    uart_print!("It works! :D\n");
+    kheap::init();
+    uart_print!("It works!");
     loop {}
 }
 
 pub mod debug;
 pub mod uart;
 pub mod vmem;
+pub mod kheap;

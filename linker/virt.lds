@@ -54,11 +54,11 @@ SECTIONS
     } >RAM AT>RAM :bss
 
     . = ALIGN(4096);
-    PROVIDE(_kstack_start = _bss_end);
+    PROVIDE(_kstack_start = .);
     PROVIDE(_kstack_end = _kstack_start + KSTACK_SIZE);
 
     . = ALIGN(4096);
-    PROVIDE(_kheap_start = _kstack_end);
+    PROVIDE(_kheap_start = .);
     PROVIDE(_kheap_end = _kheap_start + KHEAP_SIZE);
 
     . = ALIGN(4096);
