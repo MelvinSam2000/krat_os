@@ -1,5 +1,4 @@
 use linked_list_allocator::LockedHeap;
-use lazy_static::lazy_static;
 
 extern "C" {
     static KHEAP_START: usize;

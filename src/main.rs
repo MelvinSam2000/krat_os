@@ -31,7 +31,8 @@ fn alloc_error_handler(layout: Layout) -> ! {
 extern "C"
 fn kmain() {
     kheap::init();
-    uart_print!("It works!");
+    vmem::palloc::init();
+    uart_print!("It works! :)\n");
     loop {}
 }
 
