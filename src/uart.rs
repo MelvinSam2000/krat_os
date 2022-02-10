@@ -5,7 +5,7 @@ use spin::Mutex;
 use core::fmt::Arguments;
 use core::fmt::Write;
 
-const UART_BASE_ADDR: usize = 0x1000_0000;
+use crate::memlayout::UART_BASE_ADDR;
 
 lazy_static! {
     static ref UART_HNDL: Mutex<MmioSerialPort> = {

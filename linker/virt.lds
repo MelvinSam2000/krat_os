@@ -39,7 +39,7 @@ SECTIONS
         PROVIDE(_rodata_end = .);
     } >RAM AT>RAM :rodata
 
-    .data : ALIGN(8)
+    .data : ALIGN(4096)
     {
         PROVIDE(_data_start = .);
         *(.data .data.*)
@@ -57,11 +57,9 @@ SECTIONS
     PROVIDE(_kstack_start = .);
     PROVIDE(_kstack_end = _kstack_start + KSTACK_SIZE);
 
-    . = ALIGN(4096);
-    PROVIDE(_kheap_start = .);
+    PROVIDE(_kheap_start = _kstack_end);
     PROVIDE(_kheap_end = _kheap_start + KHEAP_SIZE);
 
-    . = ALIGN(4096);
-    PROVIDE(_umemory_start = .);
+    PROVIDE(_umemory_start = _kheap_end);
     PROVIDE(_umemory_end = _memory_end);
 }

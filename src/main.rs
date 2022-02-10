@@ -31,10 +31,13 @@ fn alloc_error_handler(layout: Layout) -> ! {
 extern "C"
 fn kmain() {
     kheap::init();
+    unsafe { memlayout::print_sections() };
+    vmem::init();
     uart_print!("It works! :)\n");
     loop {}
 }
 
+pub mod memlayout;
 pub mod debug;
 pub mod uart;
 pub mod vmem;
