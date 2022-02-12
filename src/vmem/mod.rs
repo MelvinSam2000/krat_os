@@ -2,15 +2,9 @@ use valloc::*;
 
 use crate::memlayout::*;
 
-macro_rules! uart_print {
-    ($($arg:tt)*) => {
-        $crate::uart::write_fmt(format_args!($($arg)*));
-    };
-}
-
 pub fn init() {
     unsafe {
-
+        // initialize kernel root page table
         palloc::init();
         let kern_pt = palloc::alloc() as *mut PageTable;
         if kern_pt.is_null() {

@@ -1,4 +1,4 @@
-#![allow(dead_code, unused_variables)]
+#![allow(dead_code)]
 
 use bitflags::bitflags;
 use modular_bitfield::bitfield;
@@ -6,13 +6,8 @@ use modular_bitfield::specifiers::*;
 
 use alloc::string::String;
 
-macro_rules! uart_print {
-    ($($arg:tt)*) => {
-        $crate::uart::write_fmt(format_args!($($arg)*));
-    };
-}
-
 use crate::vmem::palloc;
+use crate::uart_print;
 
 bitflags! {
     pub struct PteFlags: u8 {
@@ -113,7 +108,11 @@ pub struct PageTable {
     entries: [Pte; 512],
 }
 
-pub unsafe fn map_page(root: *mut PageTable, va: VirtAddr, pa: PhysAddr, flags: PteFlags) {
+pub unsafe fn map_page(
+    root: *mut PageTable, 
+    va: VirtAddr, 
+    pa: PhysAddr, 
+    flags: PteFlags) {
     
     let vpn = [ va.vpn0(), va.vpn1(), va.vpn2() ];
     let mut pte = Pte::new();
@@ -124,7 +123,7 @@ pub unsafe fn map_page(root: *mut PageTable, va: VirtAddr, pa: PhysAddr, flags: 
         if (pte.flags() & PteFlags::V.bits) == 0 {
             let page = palloc::alloc() as *mut PageTable;
             if page.is_null() {
-                panic!("Page Fault: No more pages can be allocated.");
+                panic!("map_page: No more pages can be allocated.");
             }
             pte.set_ppn(page as u64);
             pte.set_flags(PteFlags::V.bits);
@@ -134,12 +133,15 @@ pub unsafe fn map_page(root: *mut PageTable, va: VirtAddr, pa: PhysAddr, flags: 
         }
         pt = pte.ppn() as *mut PageTable;
     }
+
+    if (*pt).entries[vpn[0] as usize].flags() & PteFlags::V.bits != 0 {
+        panic!("map_page: Double mapping of page {:#010x} at {:#010x}\n", pt as usize, vpn[0]);
+    }
     
     pte.set_ppn(pa.ppn());
     pte.set_flags((flags | PteFlags::V).bits);
     (*pt).entries[vpn[0] as usize] = pte;
 }
-
 
 #[cfg(debug_assertions)]
 pub unsafe fn print_pt(pt: *mut PageTable) {

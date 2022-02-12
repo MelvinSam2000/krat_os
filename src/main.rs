@@ -37,8 +37,8 @@ fn kmain() {
     loop {}
 }
 
-pub mod memlayout;
 pub mod debug;
+pub mod memlayout;
 pub mod uart;
 pub mod vmem;
 pub mod kheap;
