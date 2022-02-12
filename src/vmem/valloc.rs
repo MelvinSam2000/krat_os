@@ -99,10 +99,11 @@ pub struct PhysAddr {
 impl PhysAddr {
 
     pub fn from_u64(x: u64) -> PhysAddr {
-        PhysAddr::new()
+        let out = PhysAddr::new()
             .with_padding(0)
             .with_ppn((x >> 12) & 0xfff_ffff_ffff)
-            .with_page_offset((x as u16) & 0xfff)
+            .with_page_offset((x as u16) & 0xfff);
+        out
     }
 }
 
@@ -115,8 +116,7 @@ pub struct PageTable {
 pub unsafe fn map_page(root: *mut PageTable, va: VirtAddr, pa: PhysAddr, flags: PteFlags) {
     
     let vpn = [ va.vpn0(), va.vpn1(), va.vpn2() ];
-    uart_print!("{:#05x},{:#05x},{:#05x}\n", vpn[2], vpn[1], vpn[0]);
-    let mut pte;
+    let mut pte = Pte::new();
     let mut pt = root;
 
     for lvl in (1..=2).rev() {
@@ -126,25 +126,18 @@ pub unsafe fn map_page(root: *mut PageTable, va: VirtAddr, pa: PhysAddr, flags: 
             if page.is_null() {
                 panic!("Page Fault: No more pages can be allocated.");
             }
-            pte = pte_set_page(page, PteFlags::V);
+            pte.set_ppn(page as u64);
+            pte.set_flags(PteFlags::V.bits);
             (*pt).entries[vpn[lvl] as usize] = pte;
-            uart_print!("{:#010x} + {:#05x} <= {:#010x} {:?}\n", 
-                pt as usize, vpn[lvl] as usize, pte.ppn(), print_flags(pte.flags()));
+            //uart_print!("{:#010x} + {:#05x} <= {:#010x} {:?}\n", 
+            //    pt as usize, vpn[lvl] as usize, pte.ppn(), print_flags(pte.flags()));
         }
         pt = pte.ppn() as *mut PageTable;
     }
-    pte = pte_set_page(pa.into_bytes()[0] as *mut PageTable, flags | PteFlags::V);
     
+    pte.set_ppn(pa.ppn());
+    pte.set_flags((flags | PteFlags::V).bits);
     (*pt).entries[vpn[0] as usize] = pte;
-    uart_print!("{:#010x} + {:#05x} <= {:#010x} {:?}\n", 
-        pt as usize, vpn[0] as usize, pte.ppn(), print_flags(pte.flags()));
-}
-
-fn pte_set_page(page: *mut PageTable, flags: PteFlags) -> Pte {
-    let mut pte = Pte::new();
-    pte.set_ppn(page as u64);
-    pte.set_flags(flags.bits);
-    pte
 }
 
 
@@ -155,18 +148,20 @@ pub unsafe fn print_pt(pt: *mut PageTable) {
         if entry.flags() & PteFlags::V.bits != 0 {
             let pa = entry.ppn();
             let flags = print_flags(entry.flags());
-            uart_print!("\t{:#05x} => {:#010x} {:?}\n", i, pa, flags);
+            uart_print!("\t {:#05x} => {:#010x} {:?}\n", i, pa, flags);
         }
     }
 }
 
 #[cfg(debug_assertions)]
-pub unsafe fn print_pts_dfs(pt: *mut PageTable) {
+pub unsafe fn print_pts_dfs(pt: *mut PageTable, lvl: u8) {
     print_pt(pt);
-    for entry in (*pt).entries {
+    if lvl == 0 || lvl > 2 {
+        return;
+    }
+    for entry in (*pt).entries.iter() {
         if entry.flags() & PteFlags::V.bits != 0 {
-            uart_print!("HEYYOOO\n");
-            print_pts_dfs(entry.ppn() as *mut PageTable);
+            print_pts_dfs(entry.ppn() as *mut PageTable, lvl - 1);
         }
     }
 }
