@@ -5,5 +5,5 @@ target = "riscv64gc-unknown-none-elf"
 rustflags = [
     "-C", "link-arg=-Tlinker/virt.lds"
 ]
-runner = "qemu-system-riscv64 -machine virt -cpu rv64 -smp 4 -m 256M  -nographic -serial mon:stdio -bios none -kernel "
-#runner = "qemu-system-riscv64 -s -S -machine virt -cpu rv64 -smp 4 -m 256M  -nographic -serial mon:stdio -bios none -kernel "
+runner = "qemu-system-riscv64 -machine virt -cpu rv64 -smp 4 -m 256M  -nographic -serial mon:stdio -bios default -kernel "
+#runner = "qemu-system-riscv64 -s -S -machine virt -cpu rv64 -smp 4 -m 256M  -nographic -serial mon:stdio -bios default -kernel "
