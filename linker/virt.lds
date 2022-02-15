@@ -55,11 +55,11 @@ SECTIONS
 
     . = ALIGN(4096);
     PROVIDE(_kstack_start = .);
-    PROVIDE(_kstack_end = _kstack_start + KSTACK_SIZE);
+    PROVIDE(_kstack_end = _kstack_start + KSTACK_SIZE - 1);
 
-    PROVIDE(_kheap_start = _kstack_end);
-    PROVIDE(_kheap_end = _kheap_start + KHEAP_SIZE);
+    PROVIDE(_kheap_start = _kstack_end + 1);
+    PROVIDE(_kheap_end = _kheap_start + KHEAP_SIZE - 1);
 
-    PROVIDE(_umemory_start = _kheap_end);
-    PROVIDE(_umemory_end = _memory_end);
+    PROVIDE(_umemory_start = _kheap_end + 1);
+    PROVIDE(_umemory_end = _memory_end - 1);
 }

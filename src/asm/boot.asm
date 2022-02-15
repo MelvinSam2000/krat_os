@@ -4,7 +4,10 @@
 _start:
 
     // set gp pointer
+.option push
+.option norelax
     la      gp, _global_pointer
+.option pop
 
     // set sp pointer
     la      sp, _kstack_end
@@ -13,11 +16,10 @@ _start:
     call    clear_bss
     
     // set trap vector csr
-    la		t2, trap_vector
-    csrw	stvec, t2
+    la		t0, trap_vector
+    csrw	stvec, t0
 
     // go to Rust (kmain)
-    la		ra, park
     call    kmain
 
 clear_bss:

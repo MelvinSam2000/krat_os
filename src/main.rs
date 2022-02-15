@@ -6,6 +6,7 @@ extern crate alloc;
 
 use core::panic::PanicInfo;
 use core::arch::global_asm;
+use core::arch::asm;
 
 use alloc::alloc::Layout;
 
@@ -19,7 +20,8 @@ extern "C"
 fn panic_handler(info: &PanicInfo) -> ! {
     uart_print!("FATAL - Kernel Panic:\n");
     uart_print!("{}\n", info);
-    loop {}
+    loop { unsafe { asm!("wfi"); } }
+    
 }
 
 #[alloc_error_handler]
@@ -34,7 +36,7 @@ fn kmain() {
     unsafe { memlayout::print_sections() };
     vmem::init();
     uart_print!("It works! :)\n");
-    loop {}
+    loop { unsafe { asm!("wfi"); } }
 }
 
 pub mod debug;
