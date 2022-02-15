@@ -8,14 +8,21 @@ Currently targets the RV64GC ISA, and the QEMU virt machine. May support other R
 
 Cargo, as well as qemu RISC-V are required. 
 
-May create an ISO image in the future.
-
 Will update this later...
 
 
 ## Usage
 
-Also later...
+Compile kernel with cargo
+
+```bash
+cargo build
+```
+
+Run OS with qemu
+```bash
+cargo run
+```
 
 ## Contributing
 
