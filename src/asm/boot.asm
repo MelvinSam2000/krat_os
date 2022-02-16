@@ -1,7 +1,7 @@
 .section .text.init
-.global _start
+.global entry
 
-_start:
+entry:
 
     // set global pointer
 .option push

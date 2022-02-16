@@ -42,15 +42,15 @@ fn alloc_error_handler(layout: Layout) -> ! {
 /// enters Rust.
 #[no_mangle]
 extern "C"
-fn kmain() {
+fn kmain(_hart_id: u64, fdt_ptr: u64) {
+
+    fdt::init(fdt_ptr);
     trap::init();
     kheap::init();
-    unsafe { memlayout::print_sections() };
+    // unsafe { memlayout::print_sections() };
     vmem::init();
     uart_print!("It works! :)\n");
-    unsafe { let x = *(0xa0000000 as *mut u8); };
-    uart_print!("Back from trap! :)\n");
-    
+
     loop { unsafe { asm!("wfi"); } }
 }
 
@@ -60,3 +60,4 @@ pub mod uart;
 pub mod vmem;
 pub mod kheap;
 pub mod trap;
+pub mod fdt;

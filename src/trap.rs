@@ -38,7 +38,7 @@ fn trap_handler(
     uart_print!("stval:  {:#018x}\n", stval);
     uart_print!("scause: {:#018x}\n", scause);
     uart_print!("status: {:#018x}\n", status);
-    uart_print!("trap:   {:#018x?}\n", trap_frame);
+    //uart_print!("trap:   {:#018x?}\n", trap_frame);
 
     let mut ret_pc = sepc;
 

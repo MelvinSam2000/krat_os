@@ -1,5 +1,5 @@
 OUTPUT_ARCH("riscv")
-ENTRY(_start)
+ENTRY(entry)
 
 MEM_SIZE = 256M;
 KSTACK_SIZE = 16K;
