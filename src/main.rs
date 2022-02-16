@@ -44,3 +44,4 @@ pub mod memlayout;
 pub mod uart;
 pub mod vmem;
 pub mod kheap;
+pub mod trap;
