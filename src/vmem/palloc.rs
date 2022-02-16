@@ -52,7 +52,7 @@ pub unsafe fn alloc() -> *mut u8 {
 
 /// Deallocates a page.
 pub unsafe fn dealloc(_page_ptr: *mut u8) {
-    unimplemented!();
+    //unimplemented!();
 }
 
 unsafe fn is_allocated(page_ptr: usize) -> bool {

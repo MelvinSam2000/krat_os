@@ -26,8 +26,8 @@ impl VirtAddr {
         (self.bits >> 30) & 0x1ff
     }
 
-    pub fn vpn(&self) -> [u64; 3] {
-        [self.vpn0() as u64, self.vpn1() as u64, self.vpn2() as u64]
+    pub fn vpn(&self) -> [usize; 3] {
+        [self.vpn0() as usize, self.vpn1() as usize, self.vpn2() as usize]
     }
 
     pub fn page_offset(&self) -> u64 {
