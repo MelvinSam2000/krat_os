@@ -1,18 +1,16 @@
 .section .text
 .global trap_vector
+.option norvc
 trap_vector:
-    
-    // get hart id (?)
-    add     a0, zero, zero  
 
     // get status registers for trap handler
-    csrr    a1, sepc
-    csrr    a2, stval
-    csrr    a3, scause
-    csrr    a4, sstatus
+    csrr    a0, sepc
+    csrr    a1, stval
+    csrr    a2, scause
+    csrr    a3, sstatus
     
     // get trap frame (?)
-    add     a5, zero, zero
+    add     a4, zero, zero
 
     call    trap_handler  
 
