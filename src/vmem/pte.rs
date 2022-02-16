@@ -3,8 +3,6 @@ use alloc::string::String;
 
 use core::fmt;
 
-use crate::uart_print;
-
 bitflags! {
     pub struct PteFlags: u8 {
         const V = 1 << 0;

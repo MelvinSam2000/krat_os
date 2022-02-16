@@ -20,6 +20,8 @@ extern "C" {
 
 pub static UART_BASE_ADDR: usize = 0x1000_0000;
 
+/// Helper function. 
+/// Prints the memory layout as specified in the linker script.
 #[cfg(debug_assertions)]
 pub unsafe fn print_sections() {
     uart_print!("===========================\n");

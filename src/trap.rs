@@ -7,11 +7,15 @@ struct TrapFrame {
     _nothing_yet: u64,
 }
 
+/// This function handles traps. The trap vector
+/// jumps to this function after saving the trap
+/// frame in order to be able to handle all supervisor
+/// traps in Rust.
 #[no_mangle]
 extern "C"
 fn trap_handler(
     sepc: u64, stval: u64, scause: u64, status: u64,
-    trap_frame: &TrapFrame
+    _trap_frame: &TrapFrame
 ) {
     uart_print!("ENTERED TRAP HANDLER...\n");
     uart_print!("sepc:   {:#018x}\n", sepc);

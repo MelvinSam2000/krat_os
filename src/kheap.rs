@@ -1,13 +1,11 @@
 use linked_list_allocator::LockedHeap;
 
-extern "C" {
-    static KHEAP_START: usize;
-    static KHEAP_END: usize;
-}
+use crate::memlayout::*;
 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
+/// This function is called to initialize kernel heap.
 pub fn init() {
     unsafe {
         ALLOCATOR.lock().init(KHEAP_START, KHEAP_END - KHEAP_START);

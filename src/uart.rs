@@ -15,10 +15,12 @@ lazy_static! {
     };
 }
 
+/// Print simple messages via UART 
 pub fn write_str(msg: &str) { 
     UART_HNDL.lock().write_str(msg).unwrap();
 }
 
+/// Print complex messages via UART, using format_args
 pub fn write_fmt(args: Arguments) {
     UART_HNDL.lock().write_fmt(args).unwrap();
 }

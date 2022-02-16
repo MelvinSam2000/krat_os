@@ -14,6 +14,9 @@ global_asm!(include_str!("asm/boot.asm"));
 global_asm!(include_str!("asm/mem.asm"));
 global_asm!(include_str!("asm/trap.asm"));
 
+/// Whenever there is a fatal kernel panic,
+/// this function is called. It also prints
+/// panic info. 
 #[panic_handler]
 #[no_mangle]
 extern "C" 
@@ -24,11 +27,19 @@ fn panic_handler(info: &PanicInfo) -> ! {
     
 }
 
+/// Error handler for kernel heap allocation.
+/// If the heap allocation failed for any reason
+/// it will print the layout and the kernel will
+/// immediately panic.
 #[alloc_error_handler]
 fn alloc_error_handler(layout: Layout) -> ! {
     panic!("Allocation error: {:?}", layout);
 }
 
+/// Kernel main where all other modules are
+/// initialized. This function is the first
+/// function to be called when the kernel
+/// enters Rust.
 #[no_mangle]
 extern "C"
 fn kmain() {

@@ -12,7 +12,6 @@ static mut ALLOC: PageAllocator = PageAllocator {
     allocated: Vec::new(),
 };
 
-
 struct PageAllocator {
     cur: usize,
     total_allocated: usize,
@@ -20,6 +19,9 @@ struct PageAllocator {
     allocated: Vec<bool>
 }
 
+/// Initialize physical page allocator.
+/// Creates an allocator that uses both static and heap memory,
+/// but the pages themselves are stored in the user memory region. 
 pub fn init() {
     unsafe {
         ALLOC.cur = UMEMORY_START;
@@ -30,6 +32,7 @@ pub fn init() {
     }
 }
 
+/// Allocate a page.
 pub unsafe fn alloc() -> *mut u8 {
 
     if ALLOC.total_allocated == ALLOC.page_capacity {
@@ -47,7 +50,8 @@ pub unsafe fn alloc() -> *mut u8 {
     ALLOC.cur as *mut u8
 }
 
-pub unsafe fn dealloc(page_ptr: *mut u8) {
+/// Deallocates a page.
+pub unsafe fn dealloc(_page_ptr: *mut u8) {
     unimplemented!();
 }
 
