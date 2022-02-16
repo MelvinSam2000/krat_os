@@ -22,5 +22,87 @@ fn trap_handler(
     uart_print!("stval:  {:#018x}\n", stval);
     uart_print!("scause: {:#018x}\n", scause);
     uart_print!("status: {:#018x}\n", status);
+
+    // Trap table for interrupts and sync exceptions
+    let is_interrupt = scause & 0x8000_0000_0000_0000 != 0;
+    let cause = scause & 0xff;
+    if is_interrupt {
+        match cause {
+            1 => {
+                // Supervisor software interrupt.
+                uart_print!("Supervisor software interrupt.\n");
+            },
+            4 => {
+                // Supervisor timer interrupt.
+                uart_print!("Supervisor timer interrupt.\n");
+            },
+            9 => {
+                // Supervisor external interrupt.
+                uart_print!("Supervisor external interrupt.\n");
+            },
+            _ => {
+                panic!("Invalid scause: {}\n", scause);
+            }
+        }
+    } else {
+        match cause {
+            0 => {
+                // Instruction address misaligned. 
+                uart_print!("Instruction address misaligned.\n");
+            },
+            1 => {
+                // Instruction access fault.
+                uart_print!("Instruction access fault.\n");
+            },
+            2 => {
+                // Illegal instruction.
+                uart_print!("Illegal instruction.\n");
+            },
+            3 => {
+                // Breakpoint.
+                uart_print!("Breakpoint.\n");
+            },
+            4 => {
+                // Load address misaligned.
+                uart_print!("Load address misaligned.\n");
+            },
+            5 => {
+                // Load access fault.
+                uart_print!("Load access fault.\n");
+            },
+            6 => {
+                // Store/AMO address misaligned.
+                uart_print!("Store/AMO address misaligned.\n");
+            },
+            7 => {
+                // Store/AMO access fault.
+                uart_print!("Store/AMO access fault.\n");
+            },
+            8 => {
+                // Environment call from U-mode.
+                uart_print!("Environment call from U-mode.\n");
+            },
+            9 => {
+                // Environment call from S-mode.
+                uart_print!("Environment call from S-mode.\n");
+            },
+            12 => {
+                // Instruction page fault.
+                uart_print!("Instruction page fault.\n");
+            },
+            13 => {
+                // Load page fault.
+                uart_print!("Load page fault.\n");
+            },
+            15 => {
+                // Store/AMO page fault.
+                uart_print!("\n");
+            },
+            _ => {
+                panic!("Invalid scause: {}\n", scause);
+            }
+        }
+    }
+
     unsafe { loop { asm!("wfi"); } }
 }
