@@ -1,11 +1,27 @@
-use core::arch::asm;
-
 use crate::uart_print;
 
+use core::fmt::Debug;
+
+#[derive(Debug)]
 #[repr(C)]
 struct TrapFrame {
-    _nothing_yet: u64,
+    pub gregs: [u64; 32],
+    pub fregs: [u64; 32],
+    pub satp: u64,
 }
+
+static mut TRAP_FRAME: TrapFrame = TrapFrame {
+    gregs: [0; 32],
+    fregs: [0; 32],
+    satp: 0,
+};
+
+pub fn init() {
+    // Store trap frame into sscratch
+    riscv::register::sscratch::write(
+        unsafe { (&TRAP_FRAME as *const TrapFrame) as usize });
+}
+
 
 /// This function handles traps. The trap vector
 /// jumps to this function after saving the trap
@@ -15,16 +31,19 @@ struct TrapFrame {
 extern "C"
 fn trap_handler(
     sepc: u64, stval: u64, scause: u64, status: u64,
-    _trap_frame: &TrapFrame
-) {
+    trap_frame: &mut TrapFrame
+) -> u64 {
     uart_print!("ENTERED TRAP HANDLER...\n");
     uart_print!("sepc:   {:#018x}\n", sepc);
     uart_print!("stval:  {:#018x}\n", stval);
     uart_print!("scause: {:#018x}\n", scause);
     uart_print!("status: {:#018x}\n", status);
+    uart_print!("trap:   {:#018x?}\n", trap_frame);
+
+    let mut ret_pc = sepc;
 
     // Trap table for interrupts and sync exceptions
-    let is_interrupt = scause & 0x8000_0000_0000_0000 != 0;
+    let is_interrupt = (scause >> 63) != 0;
     let cause = scause & 0xff;
     if is_interrupt {
         match cause {
@@ -89,14 +108,17 @@ fn trap_handler(
             12 => {
                 // Instruction page fault.
                 uart_print!("Instruction page fault.\n");
+                ret_pc += 4;
             },
             13 => {
                 // Load page fault.
                 uart_print!("Load page fault.\n");
+                ret_pc += 4;
             },
             15 => {
                 // Store/AMO page fault.
                 uart_print!("\n");
+                ret_pc += 4;
             },
             _ => {
                 panic!("Invalid scause: {}\n", scause);
@@ -104,5 +126,5 @@ fn trap_handler(
         }
     }
 
-    unsafe { loop { asm!("wfi"); } }
+    ret_pc
 }

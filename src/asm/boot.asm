@@ -3,13 +3,13 @@
 
 _start:
 
-    // set gp pointer
+    // set global pointer
 .option push
 .option norelax
     la      gp, _global_pointer
 .option pop
 
-    // set sp pointer
+    // set stack pointer
     la      sp, _kstack_end
 
     // clear bss section

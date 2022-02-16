@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use crate::vmem::palloc;
 use crate::uart_print;
 use crate::vmem::pte::*;

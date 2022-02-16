@@ -43,10 +43,14 @@ fn alloc_error_handler(layout: Layout) -> ! {
 #[no_mangle]
 extern "C"
 fn kmain() {
+    trap::init();
     kheap::init();
     unsafe { memlayout::print_sections() };
     vmem::init();
     uart_print!("It works! :)\n");
+    unsafe { let x = *(0xa0000000 as *mut u8); };
+    uart_print!("Back from trap! :)\n");
+    
     loop { unsafe { asm!("wfi"); } }
 }
 
