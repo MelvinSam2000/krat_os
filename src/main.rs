@@ -43,7 +43,8 @@ fn alloc_error_handler(layout: Layout) -> ! {
 #[no_mangle]
 extern "C"
 fn kmain(_hart_id: u64, fdt_ptr: u64) {
-
+    
+    uart::init();
     fdt::init(fdt_ptr);
     trap::init();
     kheap::init();

@@ -31,7 +31,7 @@ pub fn init() {
 extern "C"
 fn trap_handler(
     sepc: u64, stval: u64, scause: u64, status: u64,
-    trap_frame: &mut TrapFrame
+    _trap_frame: &mut TrapFrame
 ) -> u64 {
     uart_print!("ENTERED TRAP HANDLER...\n");
     uart_print!("sepc:   {:#018x}\n", sepc);
