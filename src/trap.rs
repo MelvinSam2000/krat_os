@@ -51,7 +51,7 @@ fn trap_handler(
                 // Supervisor software interrupt.
                 uart_print!("Supervisor software interrupt.\n");
             },
-            4 => {
+            5 => {
                 // Supervisor timer interrupt.
                 uart_print!("Supervisor timer interrupt.\n");
             },
@@ -60,7 +60,7 @@ fn trap_handler(
                 uart_print!("Supervisor external interrupt.\n");
             },
             _ => {
-                panic!("Invalid scause: {}\n", scause);
+                panic!("Invalid scause: {:#018x}\n", scause);
             }
         }
     } else {
@@ -121,7 +121,7 @@ fn trap_handler(
                 ret_pc += 4;
             },
             _ => {
-                panic!("Invalid scause: {}\n", scause);
+                panic!("Invalid scause: {:#018x}\n", scause);
             }
         }
     }

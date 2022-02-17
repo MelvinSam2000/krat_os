@@ -1,5 +1,6 @@
 .section .text
 .global trap_vector
+.option norvc
 trap_vector:
 
     // swap sscratch with x31
