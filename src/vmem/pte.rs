@@ -3,6 +3,8 @@ use alloc::string::String;
 
 use core::fmt;
 
+use crate::vmem::PageTable;
+
 bitflags! {
     pub struct PteFlags: u8 {
         const V = 1 << 0;
@@ -31,17 +33,6 @@ impl PteFlags {
         }
         String::from_iter(out)
     }
-}
-
-pub fn pte_to_string(pte: PteFlags) -> String {
-    const FLAGS: [char; 8] = ['V','R','W','X','U','G','A','D'];
-        let mut out = ['-'; 8];
-        for i in 0..8 {
-            if pte.bits & (1 << i) != 0 {
-                out[7 - i] = FLAGS[i];
-            }
-        }
-        String::from_iter(out)
 }
 
 #[derive(Clone, Copy)]
@@ -77,6 +68,18 @@ impl Pte {
         let flags = flags.bits() as u64;
         self.bits &= !0xff;
         self.bits |= flags;
+    }
+
+    pub fn clear_flags(&mut self) {
+        self.bits &= !0xff;
+    }
+
+    pub fn pt(&self) -> *mut PageTable {
+        (self.ppn() << 12) as *mut PageTable
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.flags().contains(PteFlags::V)
     }
 }
 

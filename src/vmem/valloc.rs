@@ -1,5 +1,6 @@
 use crate::vmem::palloc;
 use crate::uart_print;
+
 use crate::vmem::pte::*;
 use crate::vmem::addr::*;
 
@@ -22,26 +23,44 @@ pub unsafe fn map_page(
     let mut pt = root;
 
     for lvl in (1..=2).rev() {
-        pte = (*pt).entries[vpn[lvl] as usize];
-        if !pte.flags().contains(PteFlags::V) {
+        pte = (*pt).entries[vpn[lvl]];
+        if !pte.is_valid() {
             let page = palloc::alloc() as *mut PageTable;
             if page.is_null() {
                 panic!("map_page: No more pages can be allocated.");
             }
             pte.set_ppn(page as u64 >> 12);
             pte.set_flags(PteFlags::V);
-            (*pt).entries[vpn[lvl] as usize] = pte;
+            (*pt).entries[vpn[lvl]] = pte;
         }
-        pt = (pte.ppn() << 12) as *mut PageTable;
+        pt = pte.pt();
     }
 
-    if (*pt).entries[vpn[0] as usize].flags().contains(PteFlags::V) {
+    if (*pt).entries[vpn[0]].is_valid() {
         panic!("map_page: Double mapping of page {:#010x} at {:#010x}\n", pt as usize, vpn[0]);
     }
     
     pte.set_ppn(pa.ppn());
     pte.set_flags(flags | PteFlags::V);
-    (*pt).entries[vpn[0] as usize] = pte;
+    (*pt).entries[vpn[0]] = pte;
+}
+
+/// Unmap a virtual address from the page table.
+/// Assume the virtual address is indeed present, otherwise panic.
+pub unsafe fn unmap_page(root: *mut PageTable, va: VirtAddr) {
+    
+    let vpn = va.vpn();
+    let mut pt = root;
+    pt = (*pt).entries[vpn[2]].pt();
+    pt = (*pt).entries[vpn[1]].pt();
+    let pte = &mut (*pt).entries[vpn[0]];
+    if !pte.is_valid() {
+        panic!("Attempting to unmap an invalid va");
+    }
+    let pt = pte.pt();
+    palloc::dealloc(pt as *mut u8);
+    pte.set_ppn(0);
+    pte.clear_flags();
 }
 
 /// Translate a va to pa given a page table.
@@ -52,9 +71,9 @@ pub unsafe fn va_to_pa(root: *mut PageTable, va: VirtAddr) -> PhysAddr {
     let vpn = va.vpn();
     let offset = va.page_offset();
     let mut pt = root;
-    pt = ((*pt).entries[vpn[2] as usize].ppn() << 12) as *mut PageTable;
-    pt = ((*pt).entries[vpn[1] as usize].ppn() << 12) as *mut PageTable;
-    let pa = ((*pt).entries[vpn[0] as usize].ppn() << 12) | (offset as u64);
+    pt = (*pt).entries[vpn[2]].pt();
+    pt = (*pt).entries[vpn[1]].pt();
+    let pa = ((*pt).entries[vpn[0]].ppn() << 12) | (offset as u64);
     PhysAddr::from_bits(pa)
 }
 
@@ -95,7 +114,7 @@ pub unsafe fn map_range(
 pub unsafe fn print_pt(pt: *mut PageTable) {
     uart_print!("PTEs at {:#010x}...\n", pt as usize);
     for (i, entry) in (*pt).entries.iter().enumerate() {
-        if entry.flags().contains(PteFlags::V) {
+        if entry.is_valid() {
             uart_print!("\t [{:03}] => PTE <{}>\n", i, entry);
         }
     }
@@ -109,7 +128,7 @@ pub unsafe fn print_pts_dfs(pt: *mut PageTable, lvl: u8) {
         return;
     }
     for entry in (*pt).entries.iter() {
-        if entry.flags().contains(PteFlags::V) {
+        if entry.is_valid() {
             print_pts_dfs((entry.ppn() << 12) as *mut PageTable , lvl - 1);
         }
     }
