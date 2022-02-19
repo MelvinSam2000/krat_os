@@ -10,5 +10,6 @@ pub fn init() {
     unsafe {
         ALLOCATOR.lock().init(KHEAP_START, KHEAP_END - KHEAP_START);
     }
+    log::debug!("Kernel heap initialized.");
 }
 

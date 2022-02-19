@@ -10,6 +10,7 @@ pub fn init(plic_base: usize) {
     unsafe {
         PLIC_BASE = plic_base;
     }
+    log::debug!("PLIC initialized.");
 }
 
 pub fn claim() -> Option<u32> {
@@ -53,3 +54,7 @@ pub fn set_priority(id: u32, prio: u32) {
     }
 }
 
+// NOTE: Only for virt board
+fn plic_context_for(hart_id: usize) -> usize {
+    return 1 + 2 * hart_id;
+}

@@ -47,6 +47,7 @@ extern "C"
 fn kmain(_hart_id: u64, fdt_ptr: u64) {
     
     uart::init(UART_BASE_ADDR);
+    logger::init();
     fdt::init(fdt_ptr);
     
     plic::init(PLIC_BASE_ADDR);
@@ -61,8 +62,7 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) {
     plic::enable(10);
     plic::set_priority(10, 1);
 
-    // testing clint
-
+    let x = unsafe { *(0 as *mut u8) };
 
     unsafe {
         asm!{
@@ -81,15 +81,15 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) {
             // "ecall"
         }
     }
-  
-  
     
-    uart_print!("It works! :)\n");
+    //uart_print!("It works! :)\n");
+    log::info!("Logging works! :D");
 
     loop { unsafe { asm!("wfi"); } }
 }
 
-pub mod debug;
+pub mod logger;
+pub mod macros;
 pub mod memlayout;
 pub mod uart;
 pub mod vmem;

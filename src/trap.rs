@@ -1,5 +1,3 @@
-use crate::uart_print;
-
 use core::fmt::Debug;
 use core::arch::asm;
 
@@ -37,12 +35,12 @@ fn trap_handler(
     sepc: u64, stval: u64, scause: u64, sstatus: u64,
     _trap_frame: &mut TrapFrame
 ) -> u64 {
-    uart_print!("ENTERED TRAP HANDLER...\n");
-    uart_print!("sepc:      {:#018x}\n", sepc);
-    uart_print!("stval:     {:#018x}\n", stval);
-    uart_print!("scause:    {:#018x}\n", scause);
-    uart_print!("sstatus:   {:#018x}\n", sstatus);
-    //uart_print!("trap:   {:#018x?}\n", trap_frame);
+    log::info!("ENTERED TRAP HANDLER...");
+    log::info!("sepc:      {:#018x}", sepc);
+    log::info!("stval:     {:#018x}", stval);
+    log::info!("scause:    {:#018x}", scause);
+    log::info!("sstatus:   {:#018x}", sstatus);
+    //log::info!("trap:   {:#018x?}", trap_frame);
 
     let mut ret_pc = sepc;
 
@@ -53,14 +51,14 @@ fn trap_handler(
         match cause {
             1 => {
                 // Supervisor software interrupt.
-                uart_print!("Supervisor software interrupt.\n");
+                log::info!("Supervisor software interrupt.");
                 unsafe { asm! {
                     "csrci  sip, 1 << 1",
                 }}
             },
             5 => {
                 // Supervisor timer interrupt.
-                uart_print!("Supervisor timer interrupt.\n");
+                log::info!("Supervisor timer interrupt.");
                 unsafe { asm! {
                     "li     t0, 1 << 5",
                     "csrc   sip, t0",
@@ -68,89 +66,89 @@ fn trap_handler(
             },
             9 => {
                 // Supervisor external interrupt.
-                uart_print!("Supervisor external interrupt.\n");
+                log::info!("Supervisor external interrupt.");
                 if let Some(int_id) = plic::claim() {
                     match int_id {
                         10 => {
                             let c = uart::get_char();
-                            uart_print!("RECV: {}/n", c);
+                            log::info!("RECV: {}/n", c);
                         },
                         _ => {
-                            uart_print!("Int ID: {} has no handler.", int_id);
+                            log::info!("Int ID: {} has no handler.", int_id);
                         }
                     }
                 }
             },
             _ => {
-                panic!("Invalid scause: {:#018x}\n", scause);
+                panic!("Invalid scause: {:#018x}", scause);
             }
         }
     } else {
         match cause {
             0 => {
                 // Instruction address misaligned. 
-                uart_print!("Instruction address misaligned.\n");
+                log::info!("Instruction address misaligned.");
             },
             1 => {
                 // Instruction access fault.
-                uart_print!("Instruction access fault.\n");
+                log::info!("Instruction access fault.");
             },
             2 => {
                 // Illegal instruction.
-                uart_print!("Illegal instruction.\n");
+                log::info!("Illegal instruction.");
             },
             3 => {
                 // Breakpoint.
-                uart_print!("Breakpoint.\n");
+                log::info!("Breakpoint.");
             },
             4 => {
                 // Load address misaligned.
-                uart_print!("Load address misaligned.\n");
+                log::info!("Load address misaligned.");
             },
             5 => {
                 // Load access fault.
-                uart_print!("Load access fault.\n");
-                uart_print!("Invalid access at {:#010x}\n", stval);
+                log::info!("Load access fault.");
+                log::info!("Invalid access at {:#010x}", stval);
                 ret_pc += 4;
             },
             6 => {
                 // Store/AMO address misaligned.
-                uart_print!("Store/AMO address misaligned.\n");
+                log::info!("Store/AMO address misaligned.");
             },
             7 => {
                 // Store/AMO access fault.
-                uart_print!("Store/AMO access fault.\n");
-                uart_print!("Invalid access at {:#010x}\n", stval);
+                log::info!("Store/AMO access fault.");
+                log::info!("Invalid access at {:#010x}", stval);
                 ret_pc += 4;
             },
             8 => {
                 // Environment call from U-mode.
-                uart_print!("Environment call from U-mode.\n");
+                log::info!("Environment call from U-mode.");
             },
             9 => {
                 // Environment call from S-mode.
-                uart_print!("Environment call from S-mode.\n");
+                log::info!("Environment call from S-mode.");
             },
             12 => {
                 // Instruction page fault.
-                uart_print!("Instruction page fault.\n");
-                uart_print!("Invalid access at {:#010x}\n", stval);
+                log::info!("Instruction page fault.");
+                log::info!("Invalid access at {:#010x}", stval);
                 ret_pc += 4;
             },
             13 => {
                 // Load page fault.
-                uart_print!("Load page fault.\n");
-                uart_print!("Invalid access at {:#010x}\n", stval);
+                log::info!("Load page fault.");
+                log::info!("Invalid access at {:#010x}", stval);
                 ret_pc += 4;
             },
             15 => {
                 // Store/AMO page fault.
-                uart_print!("Store/AMO page fault.\n");
-                uart_print!("Invalid access at {:#010x}\n", stval);
+                log::info!("Store/AMO page fault.");
+                log::info!("Invalid access at {:#010x}", stval);
                 ret_pc += 4;
             },
             _ => {
-                panic!("Invalid scause: {:#018x}\n", scause);
+                panic!("Invalid scause: {:#018x}", scause);
             }
         }
     }
