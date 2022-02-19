@@ -98,9 +98,6 @@ trap_vector:
     // update return pc
     csrw    sepc, a0
 
-    // swap sscratch with x31
-    csrrw   x31, sscratch, x31
-
     // load general purpose registers from trap frame
     ld      x1, 8(x31)
     ld      x2, 16(x31)

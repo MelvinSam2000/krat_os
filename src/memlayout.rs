@@ -18,7 +18,9 @@ extern "C" {
     pub static UMEMORY_END: usize;
 }
 
+pub static PLIC_BASE_ADDR: usize = 0x0c00_0000;
 pub static UART_BASE_ADDR: usize = 0x1000_0000;
+
 
 /// Helper function. 
 /// Prints the memory layout as specified in the linker script.

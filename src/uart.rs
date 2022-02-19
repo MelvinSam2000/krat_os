@@ -3,13 +3,11 @@ use uart_16550::MmioSerialPort;
 use core::fmt::Arguments;
 use core::fmt::Write;
 
-use crate::memlayout::UART_BASE_ADDR;
-
 static mut UART_HNDL: Option<MmioSerialPort> = None;
 
-pub fn init() {
+pub fn init(uart_base: usize) {
     unsafe {
-        UART_HNDL = Some(MmioSerialPort::new(UART_BASE_ADDR));
+        UART_HNDL = Some(MmioSerialPort::new(uart_base));
         UART_HNDL.as_mut().unwrap().init();
     }
 }
@@ -25,5 +23,11 @@ pub fn write_str(msg: &str) {
 pub fn write_fmt(args: Arguments) {
     unsafe {
         UART_HNDL.as_mut().unwrap().write_fmt(args).unwrap();
+    }
+}
+
+pub fn get_char() -> char {
+    unsafe {
+        UART_HNDL.as_mut().unwrap().receive() as char
     }
 }

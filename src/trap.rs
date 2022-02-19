@@ -1,6 +1,10 @@
 use crate::uart_print;
 
 use core::fmt::Debug;
+use core::arch::asm;
+
+use crate::plic;
+use crate::uart;
 
 #[derive(Debug)]
 #[repr(C)]
@@ -30,14 +34,14 @@ pub fn init() {
 #[no_mangle]
 extern "C"
 fn trap_handler(
-    sepc: u64, stval: u64, scause: u64, status: u64,
+    sepc: u64, stval: u64, scause: u64, sstatus: u64,
     _trap_frame: &mut TrapFrame
 ) -> u64 {
     uart_print!("ENTERED TRAP HANDLER...\n");
-    uart_print!("sepc:   {:#018x}\n", sepc);
-    uart_print!("stval:  {:#018x}\n", stval);
-    uart_print!("scause: {:#018x}\n", scause);
-    uart_print!("status: {:#018x}\n", status);
+    uart_print!("sepc:      {:#018x}\n", sepc);
+    uart_print!("stval:     {:#018x}\n", stval);
+    uart_print!("scause:    {:#018x}\n", scause);
+    uart_print!("sstatus:   {:#018x}\n", sstatus);
     //uart_print!("trap:   {:#018x?}\n", trap_frame);
 
     let mut ret_pc = sepc;
@@ -50,14 +54,32 @@ fn trap_handler(
             1 => {
                 // Supervisor software interrupt.
                 uart_print!("Supervisor software interrupt.\n");
+                unsafe { asm! {
+                    "csrci  sip, 1 << 1",
+                }}
             },
             5 => {
                 // Supervisor timer interrupt.
                 uart_print!("Supervisor timer interrupt.\n");
+                unsafe { asm! {
+                    "li     t0, 1 << 5",
+                    "csrc   sip, t0",
+                }}
             },
             9 => {
                 // Supervisor external interrupt.
                 uart_print!("Supervisor external interrupt.\n");
+                if let Some(int_id) = plic::claim() {
+                    match int_id {
+                        10 => {
+                            let c = uart::get_char();
+                            uart_print!("RECV: {}/n", c);
+                        },
+                        _ => {
+                            uart_print!("Int ID: {} has no handler.", int_id);
+                        }
+                    }
+                }
             },
             _ => {
                 panic!("Invalid scause: {:#018x}\n", scause);
@@ -88,6 +110,8 @@ fn trap_handler(
             5 => {
                 // Load access fault.
                 uart_print!("Load access fault.\n");
+                uart_print!("Invalid access at {:#010x}\n", stval);
+                ret_pc += 4;
             },
             6 => {
                 // Store/AMO address misaligned.
@@ -96,6 +120,8 @@ fn trap_handler(
             7 => {
                 // Store/AMO access fault.
                 uart_print!("Store/AMO access fault.\n");
+                uart_print!("Invalid access at {:#010x}\n", stval);
+                ret_pc += 4;
             },
             8 => {
                 // Environment call from U-mode.
@@ -108,16 +134,19 @@ fn trap_handler(
             12 => {
                 // Instruction page fault.
                 uart_print!("Instruction page fault.\n");
+                uart_print!("Invalid access at {:#010x}\n", stval);
                 ret_pc += 4;
             },
             13 => {
                 // Load page fault.
                 uart_print!("Load page fault.\n");
+                uart_print!("Invalid access at {:#010x}\n", stval);
                 ret_pc += 4;
             },
             15 => {
                 // Store/AMO page fault.
-                uart_print!("\n");
+                uart_print!("Store/AMO page fault.\n");
+                uart_print!("Invalid access at {:#010x}\n", stval);
                 ret_pc += 4;
             },
             _ => {

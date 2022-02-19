@@ -34,12 +34,6 @@ pub fn init() {
             PhysAddr::from_bits(DATA_START as u64), 
             PteFlags::RW);
 
-        // map UART registers
-        map_page(kern_pt, 
-            VirtAddr::from_bits(UART_BASE_ADDR as u64), 
-            PhysAddr::from_bits(UART_BASE_ADDR as u64), 
-            PteFlags::RW);
-
         // map kernel stack
         map_range(kern_pt, 
             VirtAddr::from_bits(KSTACK_START as u64),
@@ -51,6 +45,22 @@ pub fn init() {
         map_page(kern_pt, 
             VirtAddr::from_bits(KHEAP_START as u64), 
             PhysAddr::from_bits(KHEAP_START as u64),
+            PteFlags::RW);
+
+        // map UART registers
+        map_page(kern_pt, 
+            VirtAddr::from_bits(UART_BASE_ADDR as u64), 
+            PhysAddr::from_bits(UART_BASE_ADDR as u64), 
+            PteFlags::RW);
+
+        // map PLIC registers
+        map_many(kern_pt,
+            VirtAddr::from_bits(PLIC_BASE_ADDR as u64), 
+            PhysAddr::from_bits(PLIC_BASE_ADDR as u64), 
+            PteFlags::RW, 3);
+        map_page(kern_pt, 
+            VirtAddr::from_bits((PLIC_BASE_ADDR + 0x20_0000) as u64), 
+            PhysAddr::from_bits((PLIC_BASE_ADDR + 0x20_0000) as u64), 
             PteFlags::RW);
 
         // turn on MMU

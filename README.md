@@ -24,6 +24,21 @@ Run OS with qemu
 cargo run
 ```
 
+## TODO
+
+### Low priority
+
+- [ ] Replace physical page allocator 
+- [ ] Implement fdt parser
+
+### High priority
+
+- [ ] Fix timer interrupt
+- [ ] Fix PLIC 
+- [ ] Better logging
+- [ ] Basic Syscalls
+- [ ] Basic Scheduler
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
