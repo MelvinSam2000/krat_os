@@ -60,8 +60,17 @@ fn trap_handler(
                 // Supervisor timer interrupt.
                 log::info!("Supervisor timer interrupt.");
                 unsafe { asm! {
-                    "li     t0, 1 << 5",
-                    "csrc   sip, t0",
+                    // add time
+                    "csrr   t0, time",
+                    "li     t1, 10000000",
+                    "add    t0, t0, t1",
+                    // call sbi sbi_set_time(time + 10000000)
+                    "li     a6, 0",
+                    "li     a7, 0x54494d45",
+                    "mv     a0, t0",
+                    "ecall",
+                    // "li     t0, 1 << 5",
+                    // "csrc   sie, t0",
                 }}
             },
             9 => {

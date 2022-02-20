@@ -33,8 +33,8 @@ cargo run
 
 ### High priority
 
-- [ ] Fix timer interrupt
-- [ ] Fix PLIC 
+- [x] Fix timer interrupt
+- [x] Fix PLIC 
 - [ ] Better logging
 - [ ] Basic Syscalls
 - [ ] Basic Scheduler
