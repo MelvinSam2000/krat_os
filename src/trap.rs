@@ -35,11 +35,11 @@ fn trap_handler(
     sepc: u64, stval: u64, scause: u64, sstatus: u64,
     _trap_frame: &mut TrapFrame
 ) -> u64 {
-    log::info!("ENTERED TRAP HANDLER...");
-    log::info!("sepc:      {:#018x}", sepc);
-    log::info!("stval:     {:#018x}", stval);
-    log::info!("scause:    {:#018x}", scause);
-    log::info!("sstatus:   {:#018x}", sstatus);
+    log::debug!("ENTERED TRAP HANDLER...");
+    log::debug!("sepc:      {:#018x}", sepc);
+    log::debug!("stval:     {:#018x}", stval);
+    log::debug!("scause:    {:#018x}", scause);
+    log::debug!("sstatus:   {:#018x}", sstatus);
     //log::info!("trap:   {:#018x?}", trap_frame);
 
     let mut ret_pc = sepc;
@@ -97,15 +97,15 @@ fn trap_handler(
         match cause {
             0 => {
                 // Instruction address misaligned. 
-                log::info!("Instruction address misaligned.");
+                panic!("Instruction address misaligned.");
             },
             1 => {
                 // Instruction access fault.
-                log::info!("Instruction access fault.");
+                panic!("Instruction access fault.");
             },
             2 => {
                 // Illegal instruction.
-                log::info!("Illegal instruction.");
+                panic!("Illegal instruction.");
             },
             3 => {
                 // Breakpoint.
@@ -113,22 +113,22 @@ fn trap_handler(
             },
             4 => {
                 // Load address misaligned.
-                log::info!("Load address misaligned.");
+                log::error!("Load address misaligned.");
             },
             5 => {
                 // Load access fault.
-                log::info!("Load access fault.");
-                log::info!("Invalid access at {:#010x}", stval);
+                log::error!("Load access fault.");
+                log::error!("Invalid access at {:#010x}", stval);
                 ret_pc += 4;
             },
             6 => {
                 // Store/AMO address misaligned.
-                log::info!("Store/AMO address misaligned.");
+                log::error!("Store/AMO address misaligned.");
             },
             7 => {
                 // Store/AMO access fault.
-                log::info!("Store/AMO access fault.");
-                log::info!("Invalid access at {:#010x}", stval);
+                log::error!("Store/AMO access fault.");
+                log::error!("Invalid access at {:#010x}", stval);
                 ret_pc += 4;
             },
             8 => {

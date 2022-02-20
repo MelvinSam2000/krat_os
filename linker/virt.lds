@@ -21,8 +21,11 @@ MEMORY
 SECTIONS
 {
     PROVIDE(_memory_start = ORIGIN(RAM));
-    PROVIDE(_memory_end = ORIGIN(RAM) + LENGTH(RAM));
+    PROVIDE(_memory_end = 0x8fff0000);
 
+    /* ^ quick fix, cant access > 0x90000000
+    PROVIDE(_memory_end = ORIGIN(RAM) + LENGTH(RAM));
+    */
     .text : ALIGN(8)
     {
         PROVIDE(_text_start = .);

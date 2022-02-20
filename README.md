@@ -28,14 +28,16 @@ cargo run
 
 ### Low priority
 
-- [ ] Replace physical page allocator 
+- [x] Replace physical page allocator with free lists
+- [ ] Fix virtual page deallocation
 - [ ] Implement fdt parser
 
 ### High priority
 
 - [x] Fix timer interrupt
 - [x] Fix PLIC 
-- [ ] Better logging
+- [x] Better logging
+- [ ] Proper debug logging
 - [ ] Basic Syscalls
 - [ ] Basic Scheduler
 

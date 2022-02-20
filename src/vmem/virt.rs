@@ -1,4 +1,4 @@
-use crate::vmem::palloc;
+use crate::vmem::phys;
 use crate::uart_print;
 
 use crate::vmem::pte::*;
@@ -25,7 +25,7 @@ pub unsafe fn map_page(
     for lvl in (1..=2).rev() {
         pte = (*pt).entries[vpn[lvl]];
         if !pte.is_valid() {
-            let page = palloc::alloc() as *mut PageTable;
+            let page = phys::alloc() as *mut PageTable;
             if page.is_null() {
                 panic!("map_page: No more pages can be allocated.");
             }
@@ -58,7 +58,7 @@ pub unsafe fn unmap_page(root: *mut PageTable, va: VirtAddr) {
         panic!("Attempting to unmap an invalid va");
     }
     let pt = pte.pt();
-    palloc::dealloc(pt as *mut u8);
+    phys::dealloc(pt as *mut u8);
     pte.set_ppn(0);
     pte.clear_flags();
 }

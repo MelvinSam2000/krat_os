@@ -5,7 +5,7 @@ use core::arch::asm;
 use crate::memlayout::*;
 use crate::vmem::pte::*;
 use crate::vmem::addr::*;
-use crate::vmem::valloc::*;
+use crate::vmem::virt::*;
 
 /// Initialize virtual memory.
 /// 1. Initialize physical page allocator.
@@ -15,8 +15,8 @@ use crate::vmem::valloc::*;
 pub fn init() {
     unsafe {
         // initialize kernel root page table
-        palloc::init();
-        let kern_pt = palloc::alloc() as *mut PageTable;
+        phys::init();
+        let kern_pt = phys::alloc() as *mut PageTable;
         if kern_pt.is_null() {
             panic!("Unable to allocate kernel root page table.");
         }
@@ -71,7 +71,7 @@ pub fn init() {
     }
 }
 
-pub mod palloc;
-pub mod valloc;
+pub mod phys;
+pub mod virt;
 pub mod pte;
 pub mod addr;

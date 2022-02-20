@@ -33,16 +33,15 @@ pub fn init(plic_base: usize) {
 
 pub fn claim(context: usize) -> Option<u32> {
 
-    let claim_num = unsafe { (*PLIC_BASE.unwrap()).tc[context].claim };
     unsafe {
+        let claim_num = (*PLIC_BASE.unwrap()).tc[context].claim;
+        if claim_num == 0 {
+            None
+        } else {
+            Some(claim_num)
+        }
     // log::debug!("CLAIM ADDR: {:#010x}",
     //     (&(*PLIC_BASE.unwrap()).tc[context].claim as *const u32) as usize);
-    }
-
-    if claim_num == 0 {
-        None
-    } else {
-        Some(claim_num)
     }
 }
 

@@ -23,8 +23,8 @@ global_asm!(include_str!("asm/trap.asm"));
 #[no_mangle]
 extern "C" 
 fn panic_handler(info: &PanicInfo) -> ! {
-    uart_print!("FATAL - Kernel Panic:\n");
-    uart_print!("{}\n", info);
+    log::error!("FATAL - Kernel Panic:");
+    log::error!("{}", info);
     loop { unsafe { asm!("wfi"); } }
     
 }
@@ -44,7 +44,7 @@ fn alloc_error_handler(layout: Layout) -> ! {
 /// enters Rust.
 #[no_mangle]
 extern "C"
-fn kmain(_hart_id: u64, fdt_ptr: u64) {
+fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
     
     uart::init(UART_BASE_ADDR);
     logger::init();
@@ -54,7 +54,7 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) {
 
     trap::init();
     kheap::init();
-    // unsafe { memlayout::print_sections() };
+    unsafe { memlayout::print_sections() };
     vmem::init();
 
     // configure UART interrupts for PLIC
@@ -75,10 +75,10 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) {
             "csrs   sstatus, t0",
 
             // call sbi sbi_set_time(20000000)
-            "li     a6, 0",
-            "li     a7, 0x54494d45",
-            "li     a0, 10000000",
-            "ecall"
+            // "li     a6, 0",
+            // "li     a7, 0x54494d45",
+            // "li     a0, 10000000",
+            // "ecall"
         }
     }
     
