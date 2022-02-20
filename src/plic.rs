@@ -1,21 +1,43 @@
-static mut PLIC_BASE: usize = 0;
+static mut PLIC_BASE: Option<*mut PlicRegisters> = None;
 
-const REG_PRIORITY: usize =    0x00_0000;
-const REG_PENDING: usize =     0x00_1000;
-const REG_INT_ENABLE: usize =  0x00_2000;
-const REG_THRESHOLD: usize =   0x20_0000;
-const REG_CLAIM: usize =       0x20_0004;
+const CONTEXT_MAX: usize = 15872;
+const SOURCES_MAX: usize = 1024;
+
+#[repr(C, align(4096))]
+struct PlicRegisters {
+    // base + 0x000000
+    priority: [u32; SOURCES_MAX],
+    // base + 0x001000
+    pending: [u32; SOURCES_MAX / 32],
+    _padding1: [u8; 3968],
+    // base + 0x002000
+    enable: [[u32; SOURCES_MAX / 32]; CONTEXT_MAX],
+    _padding2: [u8; 57344],
+    // base + 0x200000
+    tc: [PlicThresholdClaim; CONTEXT_MAX],
+}
+
+#[repr(C, align(4096))]
+struct PlicThresholdClaim {
+    threshold: u32,
+    claim: u32,
+    _padding: [u8; 4088],
+}
 
 pub fn init(plic_base: usize) {
     unsafe {
-        PLIC_BASE = plic_base;
+        PLIC_BASE = Some(plic_base as *mut PlicRegisters);
     }
     log::debug!("PLIC initialized.");
 }
 
-pub fn claim() -> Option<u32> {
+pub fn claim(context: usize) -> Option<u32> {
 
-    let claim_num = unsafe { *((PLIC_BASE + REG_CLAIM) as *const u32) };
+    let claim_num = unsafe { (*PLIC_BASE.unwrap()).tc[context].claim };
+    unsafe {
+    // log::debug!("CLAIM ADDR: {:#010x}",
+    //     (&(*PLIC_BASE.unwrap()).tc[context].claim as *const u32) as usize);
+    }
 
     if claim_num == 0 {
         None
@@ -24,37 +46,47 @@ pub fn claim() -> Option<u32> {
     }
 }
 
-pub fn complete(id: u32) {
+pub fn complete(source: u32, context: usize) {
     unsafe {
-        *((PLIC_BASE + REG_CLAIM) as *mut u32) = id as u32;
+        (*PLIC_BASE.unwrap()).tc[context].claim = source;
     }
 }
 
-pub fn set_threshold(threshold: u32) {
+pub fn set_threshold(threshold: u32, context: usize) {
     unsafe {
-        *((PLIC_BASE + REG_THRESHOLD) as *mut u32) = threshold & 0b111;
+        (*PLIC_BASE.unwrap()).tc[context].threshold = threshold & 0b111;
+    //     log::debug!("THRESHOLD ADDR: {:#010x}",
+    //         (&(*PLIC_BASE.unwrap()).tc[context].threshold as *const u32) as usize);        
     }
 }
 
-pub fn is_pending(id: u32) -> bool {
+pub fn is_pending(source: usize) -> bool {
     unsafe {
-        *((PLIC_BASE + REG_PENDING) as *const u32) & (1 << id) != 0
+        let out = (*PLIC_BASE.unwrap()).pending[source >> 5] & (1 << (source & 0x1f)) != 0; 
+    //     log::debug!("PENDING ADDR: {:#010x}",
+    //         (&(*PLIC_BASE.unwrap()).pending[source >> 5] as *const u32) as usize);
+        out
     }
 }
 
-pub fn enable(id: u32) {
+pub fn enable(source: usize, context: usize) {
     unsafe {
-        *((PLIC_BASE + REG_INT_ENABLE) as *mut u32) |= 1 << id;
+        
+        (*PLIC_BASE.unwrap()).enable[context][source >> 5] |= (1 << (source & 0x1f)) as u32;
+        // log::debug!("ENABLE ADDR: {:#010x}",
+        //     (&(*PLIC_BASE.unwrap()).enable[context][source >> 5] as *const u32) as usize);
     }
 }
 
-pub fn set_priority(id: u32, prio: u32) {
+pub fn set_priority(source: usize, prio: u32) {
     unsafe {
-        *((PLIC_BASE + REG_PRIORITY + (4*id as usize)) as *mut u32) = prio;
+        (*PLIC_BASE.unwrap()).priority[source] = prio;
+        // log::debug!("PRIORITY ADDR: {:#010x}", 
+        //     (&(*PLIC_BASE.unwrap()).priority[source] as *const u32) as usize);
     }
 }
 
 // NOTE: Only for virt board
-fn plic_context_for(hart_id: usize) -> usize {
-    return 1 + 2 * hart_id;
-}
+// fn plic_context_for(hart_id: usize) -> usize {
+//     return 1 + 2 * hart_id;
+// }

@@ -59,8 +59,8 @@ pub fn init() {
             PhysAddr::from_bits(PLIC_BASE_ADDR as u64), 
             PteFlags::RW, 3);
         map_page(kern_pt, 
-            VirtAddr::from_bits((PLIC_BASE_ADDR + 0x20_0000) as u64), 
-            PhysAddr::from_bits((PLIC_BASE_ADDR + 0x20_0000) as u64), 
+            VirtAddr::from_bits((PLIC_BASE_ADDR + 0x20_1000) as u64), 
+            PhysAddr::from_bits((PLIC_BASE_ADDR + 0x20_1000) as u64), 
             PteFlags::RW);
 
         // turn on MMU

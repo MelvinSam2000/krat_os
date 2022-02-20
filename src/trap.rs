@@ -67,16 +67,17 @@ fn trap_handler(
             9 => {
                 // Supervisor external interrupt.
                 log::info!("Supervisor external interrupt.");
-                if let Some(int_id) = plic::claim() {
-                    match int_id {
+                if let Some(int_source) = plic::claim(1) {
+                    match int_source {
                         10 => {
                             let c = uart::get_char();
-                            log::info!("RECV: {}/n", c);
+                            log::info!("RECV: {}", c);
                         },
                         _ => {
-                            log::info!("Int ID: {} has no handler.", int_id);
+                            log::info!("Int ID: {} has no handler.", int_source);
                         }
                     }
+                    plic::complete(int_source, 1);
                 }
             },
             _ => {

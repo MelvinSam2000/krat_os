@@ -58,11 +58,11 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) {
     vmem::init();
 
     // configure UART interrupts for PLIC
-    plic::set_threshold(0);
-    plic::enable(10);
+    plic::set_threshold(0, 1);
+    plic::enable(10, 1);
     plic::set_priority(10, 1);
 
-    let x = unsafe { *(0 as *mut u8) };
+    // let x = unsafe { *(0 as *mut u8) };
 
     unsafe {
         asm!{
@@ -77,7 +77,7 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) {
             // call sbi sbi_set_time(20000000)
             // "li     a6, 0",
             // "li     a7, 0x54494d45",
-            // "li     a0, 20000000",
+            // "li     a0, 50000000",
             // "ecall"
         }
     }
