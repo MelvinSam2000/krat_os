@@ -28,11 +28,15 @@ pub fn init(plic_base: usize) {
     unsafe {
         PLIC_BASE = Some(plic_base as *mut PlicRegisters);
     }
+    // configure UART interrupts for PLIC
+    set_threshold(0, 1);
+    enable(10, 1);
+    set_priority(10, 1);
+
     log::debug!("PLIC initialized.");
 }
 
 pub fn claim(context: usize) -> Option<u32> {
-
     unsafe {
         let claim_num = (*PLIC_BASE.unwrap()).tc[context].claim;
         if claim_num == 0 {
@@ -70,7 +74,6 @@ pub fn is_pending(source: usize) -> bool {
 
 pub fn enable(source: usize, context: usize) {
     unsafe {
-        
         (*PLIC_BASE.unwrap()).enable[context][source >> 5] |= (1 << (source & 0x1f)) as u32;
         // log::debug!("ENABLE ADDR: {:#010x}",
         //     (&(*PLIC_BASE.unwrap()).enable[context][source >> 5] as *const u32) as usize);

@@ -27,6 +27,6 @@ impl Log for KernelLogger {
 static LOGGER: KernelLogger = KernelLogger;
 
 pub fn init() {
-    log::set_logger(&LOGGER)
-        .map(|()| log::set_max_level(LevelFilter::Trace)).unwrap()
+    log::set_logger(&LOGGER).unwrap();
+    log::set_max_level(LevelFilter::Trace);
 }

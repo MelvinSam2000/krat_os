@@ -48,42 +48,16 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
     
     uart::init(UART_BASE_ADDR);
     logger::init();
+    kheap::init();
     fdt::init(fdt_ptr);
+    trap::init();
     
     plic::init(PLIC_BASE_ADDR);
-
-    trap::init();
-    kheap::init();
+    
     unsafe { memlayout::print_sections() };
     vmem::init();
 
-    // configure UART interrupts for PLIC
-    plic::set_threshold(0, 1);
-    plic::enable(10, 1);
-    plic::set_priority(10, 1);
-
-    // let x = unsafe { *(0 as *mut u8) };
-
-    unsafe {
-        asm!{
-            // enable all interrupt types
-            "li     t0, (1 << 9) | (1 << 5) | (1 << 1)",
-            "csrs   sie, t0",
-            
-            // global interrupt enable
-            "li     t0, 1 << 1",
-            "csrs   sstatus, t0",
-
-            // call sbi sbi_set_time(20000000)
-            // "li     a6, 0",
-            // "li     a7, 0x54494d45",
-            // "li     a0, 10000000",
-            // "ecall"
-        }
-    }
-    
-    //uart_print!("It works! :)\n");
-    log::info!("Logging works! :D");
+    log::info!("It works! :D");
 
     loop { unsafe { asm!("wfi"); } }
 }

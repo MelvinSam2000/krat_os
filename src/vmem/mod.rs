@@ -42,9 +42,10 @@ pub fn init() {
             PteFlags::RW);
 
         // map kernel heap
-        map_page(kern_pt, 
-            VirtAddr::from_bits(KHEAP_START as u64), 
-            PhysAddr::from_bits(KHEAP_START as u64),
+        map_range(kern_pt, 
+            VirtAddr::from_bits(KHEAP_START as u64),
+            VirtAddr::from_bits(KHEAP_END as u64),
+            PhysAddr::from_bits(KHEAP_START as u64), 
             PteFlags::RW);
 
         // map UART registers
@@ -68,6 +69,8 @@ pub fn init() {
         
         // flush TLBs
         asm!("sfence.vma");
+
+        log::debug!("Virtual memory initialized.");
     }
 }
 

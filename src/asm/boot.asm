@@ -19,6 +19,14 @@ entry:
     la		t0, trap_vector
     csrw	stvec, t0
 
+    // enable all interrupt types
+    li     t0, (1 << 9) | (1 << 5) | (1 << 1)
+    csrs   sie, t0
+    
+    // global interrupt enable
+    li     t0, 1 << 1
+    csrs   sstatus, t0
+
     // go to Rust (kmain)
     call    kmain
 

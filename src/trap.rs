@@ -1,8 +1,12 @@
 use core::fmt::Debug;
 use core::arch::asm;
 
+use alloc::string::String;
+use alloc::format;
+
 use crate::plic;
 use crate::uart;
+use crate::uart_print;
 
 #[derive(Debug)]
 #[repr(C)]
@@ -35,12 +39,16 @@ fn trap_handler(
     sepc: u64, stval: u64, scause: u64, sstatus: u64,
     _trap_frame: &mut TrapFrame
 ) -> u64 {
-    log::debug!("ENTERED TRAP HANDLER...");
-    log::debug!("sepc:      {:#018x}", sepc);
-    log::debug!("stval:     {:#018x}", stval);
-    log::debug!("scause:    {:#018x}", scause);
-    log::debug!("sstatus:   {:#018x}", sstatus);
-    //log::info!("trap:   {:#018x?}", trap_frame);
+
+    if log::log_enabled!(log::Level::Debug) {
+        let mut msg = String::from("ENTERED TRAP HANDLER...\n");
+        msg += &format!("\tsepc:      {:#018x}\n", sepc);
+        msg += &format!("\tstval:     {:#018x}\n", stval);
+        msg += &format!("\tscause:    {:#018x}\n", scause);
+        msg += &format!("\tsstatus:   {:#018x}\n", sstatus);
+        log::debug!("{}", msg);
+        //log::info!("trap:   {:#018x?}", trap_frame);
+    }
 
     let mut ret_pc = sepc;
 
@@ -58,7 +66,7 @@ fn trap_handler(
             },
             5 => {
                 // Supervisor timer interrupt.
-                log::info!("Supervisor timer interrupt.");
+                log::debug!("Supervisor timer interrupt.");
                 unsafe { asm! {
                     // add time
                     "csrr   t0, time",
@@ -69,18 +77,20 @@ fn trap_handler(
                     "li     a7, 0x54494d45",
                     "mv     a0, t0",
                     "ecall",
-                    // "li     t0, 1 << 5",
-                    // "csrc   sie, t0",
                 }}
             },
             9 => {
                 // Supervisor external interrupt.
-                log::info!("Supervisor external interrupt.");
+                log::debug!("Supervisor external interrupt.");
                 if let Some(int_source) = plic::claim(1) {
                     match int_source {
                         10 => {
                             let c = uart::get_char();
-                            log::info!("RECV: {}", c);
+                            if log::log_enabled!(log::Level::Debug) {
+                                log::debug!("RECV: {}", c);
+                            } else {
+                                uart_print!("{}", c);
+                            }
                         },
                         _ => {
                             log::info!("Int ID: {} has no handler.", int_source);
