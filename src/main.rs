@@ -7,7 +7,6 @@ extern crate alloc;
 use core::panic::PanicInfo;
 use core::arch::global_asm;
 use core::arch::asm;
-
 use alloc::alloc::Layout;
 
 use crate::memlayout::*;
@@ -25,7 +24,14 @@ extern "C"
 fn panic_handler(info: &PanicInfo) -> ! {
     log::error!("FATAL - Kernel Panic:");
     log::error!("{}", info);
-    loop { unsafe { asm!("wfi"); } }
+    loop {
+        unsafe {
+            asm! {
+                "csrci  sstatus, 1 << 1",
+                "wfi",
+            }
+        }
+    }
     
 }
 
@@ -59,7 +65,8 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
 
     log::info!("It works! :D");
 
-    loop { unsafe { asm!("wfi"); } }
+    sched::init();
+    loop {}
 }
 
 pub mod logger;
@@ -71,3 +78,5 @@ pub mod kheap;
 pub mod trap;
 pub mod fdt;
 pub mod plic;
+pub mod proc;
+pub mod sched;

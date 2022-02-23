@@ -7,10 +7,11 @@ use alloc::format;
 use crate::plic;
 use crate::uart;
 use crate::uart_print;
+use crate::sched::sched;
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
-struct TrapFrame {
+pub struct TrapFrame {
     pub gregs: [u64; 32],
     pub fregs: [u64; 32],
     pub satp: u64,
@@ -66,18 +67,8 @@ fn trap_handler(
             },
             5 => {
                 // Supervisor timer interrupt.
-                log::debug!("Supervisor timer interrupt.");
-                unsafe { asm! {
-                    // add time
-                    "csrr   t0, time",
-                    "li     t1, 10000000",
-                    "add    t0, t0, t1",
-                    // call sbi sbi_set_time(time + 10000000)
-                    "li     a6, 0",
-                    "li     a7, 0x54494d45",
-                    "mv     a0, t0",
-                    "ecall",
-                }}
+                log::info!("Supervisor timer interrupt.");
+                ret_pc = sched().unwrap();
             },
             9 => {
                 // Supervisor external interrupt.

@@ -24,8 +24,7 @@ entry:
     csrs   sie, t0
     
     // global interrupt enable
-    li     t0, 1 << 1
-    csrs   sstatus, t0
+    csrsi  sstatus, 1 << 1
 
     // go to Rust (kmain)
     call    kmain

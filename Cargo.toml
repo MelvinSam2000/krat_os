@@ -5,12 +5,6 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[profile.dev]
-panic = "abort" # disable stack unwinding on panic
-
-[profile.release]
-panic = "abort" # disable stack unwinding on panic
-
 
 [dependencies]
 riscv = "0.7.0"
