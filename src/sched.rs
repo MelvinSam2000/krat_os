@@ -3,6 +3,7 @@ use alloc::collections::vec_deque::VecDeque;
 use alloc::boxed::Box;
 
 use crate::proc::*;
+use crate::trap::TrapFrame;
 
 // Round Robin scheduler
 struct Scheduler {
@@ -21,9 +22,9 @@ pub fn init() -> Option<()> {
         SCHED.tasks = Some(VecDeque::new());
 
         // create init process
-        let mut init = Process::spawn(0);
-        init.pc = (idle as *const ()) as u64;
-        SCHED.tasks.as_mut()?.push_back(Box::new(init));
+        let mut pidle = Process::spawn(0);
+        pidle.pc = (idle as *const ()) as u64;
+        SCHED.tasks.as_mut()?.push_back(Box::new(pidle));
 
         // create p1 and p2 dummy processes
         let mut p1 = Process::spawn(1);
@@ -51,31 +52,32 @@ pub fn init() -> Option<()> {
     }
 }
 
-pub fn sched() -> Option<u64> {
+pub fn sched(trap_frame: &mut TrapFrame) -> Option<()> {
 
     unsafe {
         // stop current process
         let mut task = SCHED.tasks.as_mut()?.front_mut()?;
         task.state = ProcessState::Ready;
-        SCHED.tasks.as_mut()?.push_back(SCHED.tasks.as_mut()?.pop_front()?);
+        task.context = *trap_frame;
+        SCHED.tasks.as_mut()?.rotate_left(1);
 
         // get next ready process
-        while SCHED.tasks.as_mut()?.front()?.state != ProcessState::Ready {
-            let task = SCHED.tasks.as_mut()?.front()?;
+        while SCHED.tasks.as_ref()?.front()?.state != ProcessState::Ready {
+            let task = SCHED.tasks.as_ref()?.front()?;
             match task.state {
                 ProcessState::Dead => {
                     let _ = SCHED.tasks.as_mut()?.pop_front()?;
                 },
                 _ => {}
             }
-            SCHED.tasks.as_mut()?.push_back(SCHED.tasks.as_mut()?.pop_front()?);
+            SCHED.tasks.as_mut()?.rotate_left(1);
         }
     
         // fire timer interrupt
         asm! {
             // add time
             "csrr   t0, time",
-            "li     t1, 1000000",
+            "li     t1, 5000000",
             "add    t0, t0, t1",
             // call sbi sbi_set_time(time + 1000000)
             "li     a6, 0",
@@ -87,8 +89,10 @@ pub fn sched() -> Option<u64> {
         log::info!("Scheduling process {}", SCHED.tasks.as_mut()?.front()?.pid);
         
         // switch to new task
-        SCHED.tasks.as_mut()?.front_mut()?.state = ProcessState::Running;
-        Some(SCHED.tasks.as_mut()?.front()?.pc)
+        let mut task = SCHED.tasks.as_mut()?.front_mut()?;
+        task.state = ProcessState::Running;
+        // *trap_frame = task.context;
+        Some(())
     }
 }
 

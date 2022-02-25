@@ -14,19 +14,34 @@ use crate::sched::sched;
 pub struct TrapFrame {
     pub gregs: [u64; 32],
     pub fregs: [u64; 32],
+    pub pc: u64,
     pub satp: u64,
 }
 
 static mut TRAP_FRAME: TrapFrame = TrapFrame {
     gregs: [0; 32],
     fregs: [0; 32],
+    pc: 0,
     satp: 0,
 };
 
 pub fn init() {
+
     // Store trap frame into sscratch
     riscv::register::sscratch::write(
         unsafe { (&TRAP_FRAME as *const TrapFrame) as usize });
+
+    // Enable interrupts
+    unsafe {
+        asm! {
+            // enable all interrupt types
+            "li     t0, (1 << 9) | (1 << 5) | (1 << 1)",
+            "csrs   sie, t0",
+            // global interrupt enable
+            "csrsi  sstatus, 1 << 1",
+        }
+    }
+
 }
 
 
@@ -34,24 +49,22 @@ pub fn init() {
 /// jumps to this function after saving the trap
 /// frame in order to be able to handle all supervisor
 /// traps in Rust.
+#[link_section = ".trampoline"]
 #[no_mangle]
 extern "C"
 fn trap_handler(
-    sepc: u64, stval: u64, scause: u64, sstatus: u64,
-    _trap_frame: &mut TrapFrame
+    trap_frame: &mut TrapFrame,
+    scause: u64, stval: u64, sstatus: u64,
 ) -> u64 {
 
     if log::log_enabled!(log::Level::Debug) {
         let mut msg = String::from("ENTERED TRAP HANDLER...\n");
-        msg += &format!("\tsepc:      {:#018x}\n", sepc);
         msg += &format!("\tstval:     {:#018x}\n", stval);
         msg += &format!("\tscause:    {:#018x}\n", scause);
         msg += &format!("\tsstatus:   {:#018x}\n", sstatus);
         log::debug!("{}", msg);
         //log::info!("trap:   {:#018x?}", trap_frame);
     }
-
-    let mut ret_pc = sepc;
 
     // Trap table for interrupts and sync exceptions
     let is_interrupt = (scause >> 63) != 0;
@@ -67,8 +80,8 @@ fn trap_handler(
             },
             5 => {
                 // Supervisor timer interrupt.
-                log::info!("Supervisor timer interrupt.");
-                ret_pc = sched().unwrap();
+                log::debug!("Supervisor timer interrupt.");
+                sched(trap_frame).unwrap();
             },
             9 => {
                 // Supervisor external interrupt.
@@ -120,7 +133,7 @@ fn trap_handler(
                 // Load access fault.
                 log::error!("Load access fault.");
                 log::error!("Invalid access at {:#010x}", stval);
-                ret_pc += 4;
+                trap_frame.pc += 4;
             },
             6 => {
                 // Store/AMO address misaligned.
@@ -130,7 +143,7 @@ fn trap_handler(
                 // Store/AMO access fault.
                 log::error!("Store/AMO access fault.");
                 log::error!("Invalid access at {:#010x}", stval);
-                ret_pc += 4;
+                trap_frame.pc += 4;
             },
             8 => {
                 // Environment call from U-mode.
@@ -144,19 +157,19 @@ fn trap_handler(
                 // Instruction page fault.
                 log::info!("Instruction page fault.");
                 log::info!("Invalid access at {:#010x}", stval);
-                ret_pc += 4;
+                trap_frame.pc += 4;
             },
             13 => {
                 // Load page fault.
                 log::info!("Load page fault.");
                 log::info!("Invalid access at {:#010x}", stval);
-                ret_pc += 4;
+                trap_frame.pc += 4;
             },
             15 => {
                 // Store/AMO page fault.
                 log::info!("Store/AMO page fault.");
                 log::info!("Invalid access at {:#010x}", stval);
-                ret_pc += 4;
+                trap_frame.pc += 4;
             },
             _ => {
                 panic!("Invalid scause: {:#018x}", scause);
@@ -164,5 +177,5 @@ fn trap_handler(
         }
     }
 
-    ret_pc
+    trap_frame.pc
 }

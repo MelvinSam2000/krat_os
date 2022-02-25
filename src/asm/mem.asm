@@ -27,17 +27,23 @@ BSS_START: .dword _bss_start
 .global BSS_END
 BSS_END: .dword _bss_end
 
-.global KSTACK_START
-KSTACK_START: .dword _kstack_start
+.global TRAMPOLINE_START
+TRAMPOLINE_START: .dword _trampoline_start
 
-.global KSTACK_END
-KSTACK_END: .dword _kstack_end
+.global TRAMPOLINE_END
+TRAMPOLINE_END: .dword _trampoline_end
 
 .global KHEAP_START
 KHEAP_START: .dword _kheap_start
 
 .global KHEAP_END
 KHEAP_END: .dword _kheap_end
+
+.global KSTACK_START
+KSTACK_START: .dword _kstack_start
+
+.global KSTACK_END
+KSTACK_END: .dword _kstack_end
 
 .global UMEMORY_START
 UMEMORY_START: .dword _umemory_start

@@ -1,4 +1,4 @@
-.section .text
+.section .trampoline.vec
 .global trap_vector
 .option norvc
 trap_vector:
@@ -76,18 +76,21 @@ trap_vector:
     fsd     f30, 496(x31)
     fsd     f31, 504(x31)
 
-    // store satp into trap frame
-    csrr    t0, satp
+    // store pc into trap frame
+    csrr    t0, sepc
     sd      t0, 512(x31)
 
-    // get status registers for trap handler
-    csrr    a0, sepc
-    csrr    a1, stval
-    csrr    a2, scause
-    csrr    a3, sstatus
+    // store satp into trap frame
+    csrr    t0, satp
+    sd      t0, 520(x31)
 
     // get trap frame
-    mv      a4, x31
+    mv      a0, x31
+
+    // get status registers for trap handler
+    csrr    a1, scause
+    csrr    a2, stval
+    csrr    a3, sstatus
 
     // restore sscratch
     csrw    sscratch, x31

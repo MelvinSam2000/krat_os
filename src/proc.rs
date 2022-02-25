@@ -2,7 +2,7 @@ use crate::trap::TrapFrame;
 
 #[derive(PartialEq)]
 pub enum ProcessState {
-    Created,
+    Creating,
     Ready,
     Running,
     Blocked,
@@ -23,7 +23,7 @@ impl Process {
             pid,
             pc: 0,
             context: Default::default(),
-            state: ProcessState::Created,
+            state: ProcessState::Creating,
         };
         proc.state = ProcessState::Ready;
         proc

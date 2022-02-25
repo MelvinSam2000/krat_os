@@ -29,4 +29,5 @@ static LOGGER: KernelLogger = KernelLogger;
 pub fn init() {
     log::set_logger(&LOGGER).unwrap();
     log::set_max_level(LevelFilter::Trace);
+    log::debug!("Logger initialized.");
 }

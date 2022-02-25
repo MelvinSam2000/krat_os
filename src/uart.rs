@@ -3,6 +3,8 @@ use uart_16550::MmioSerialPort;
 use core::fmt::Arguments;
 use core::fmt::Write;
 
+use crate::uart_print;
+
 static mut UART_HNDL: Option<MmioSerialPort> = None;
 
 pub fn init(uart_base: usize) {
@@ -10,6 +12,7 @@ pub fn init(uart_base: usize) {
         UART_HNDL = Some(MmioSerialPort::new(uart_base));
         UART_HNDL.as_mut().unwrap().init();
     }
+    uart_print!("UART initialized.\n");
 }
 
 /// Print simple messages via UART 

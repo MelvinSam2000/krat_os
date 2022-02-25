@@ -9,6 +9,7 @@ PHDRS
 {
     text PT_LOAD;
     rodata PT_LOAD;
+    trampoline PT_LOAD;
     data PT_LOAD;
     bss PT_LOAD;
 }
@@ -23,7 +24,7 @@ SECTIONS
     PROVIDE(_memory_start = ORIGIN(RAM));
     PROVIDE(_memory_end = 0x8fff0000);
 
-    /* ^ quick fix, cant access > 0x90000000
+    /* ^ quick fix, cant access > 0x90000000, need to implement fdt
     PROVIDE(_memory_end = ORIGIN(RAM) + LENGTH(RAM));
     */
     .text : ALIGN(8)
@@ -42,6 +43,14 @@ SECTIONS
         PROVIDE(_rodata_end = .);
     } >RAM AT>RAM :rodata
 
+    .trampoline : ALIGN(4096)
+    {
+        PROVIDE(_trampoline_start = .);
+        *(.trampoline.vec)
+        *(.trampoline .trampoline.*)
+        PROVIDE(_trampoline_end = .);
+    } >RAM AT>RAM :trampoline
+
     .data : ALIGN(4096)
     {
         PROVIDE(_data_start = .);
@@ -53,16 +62,17 @@ SECTIONS
     {
         PROVIDE(_bss_start = .);
         *(.bss .bss.*)
+        *(.sbss .sbss.*)
         PROVIDE(_bss_end = .);
     } >RAM AT>RAM :bss
 
     . = ALIGN(4096);
-    PROVIDE(_kstack_start = .);
-    PROVIDE(_kstack_end = _kstack_start + KSTACK_SIZE - 1);
-
-    PROVIDE(_kheap_start = _kstack_end + 1);
+    PROVIDE(_kheap_start = .);
     PROVIDE(_kheap_end = _kheap_start + KHEAP_SIZE - 1);
 
-    PROVIDE(_umemory_start = _kheap_end + 1);
+    PROVIDE(_kstack_start = _kheap_end + 1);
+    PROVIDE(_kstack_end = _kstack_start + KSTACK_SIZE - 1);
+
+    PROVIDE(_umemory_start = _kstack_end + 1);
     PROVIDE(_umemory_end = _memory_end - 1);
 }

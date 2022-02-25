@@ -34,6 +34,13 @@ pub fn init() {
             PhysAddr::from_bits(DATA_START as u64), 
             PteFlags::RW);
 
+        // map kernel heap
+        map_range(kern_pt, 
+            VirtAddr::from_bits(KHEAP_START as u64),
+            VirtAddr::from_bits(KHEAP_END as u64),
+            PhysAddr::from_bits(KHEAP_START as u64), 
+            PteFlags::RW);
+
         // map kernel stack
         map_range(kern_pt, 
             VirtAddr::from_bits(KSTACK_START as u64),
@@ -41,12 +48,12 @@ pub fn init() {
             PhysAddr::from_bits(KSTACK_START as u64), 
             PteFlags::RW);
 
-        // map kernel heap
-        map_range(kern_pt, 
-            VirtAddr::from_bits(KHEAP_START as u64),
-            VirtAddr::from_bits(KHEAP_END as u64),
-            PhysAddr::from_bits(KHEAP_START as u64), 
-            PteFlags::RW);
+        // map trampoline
+        map_page(kern_pt, 
+            VirtAddr::from_bits(0xfffff000), 
+            PhysAddr::from_bits(TRAMPOLINE_START as u64), 
+            PteFlags::RW | PteFlags::G);
+       
 
         // map UART registers
         map_page(kern_pt, 
