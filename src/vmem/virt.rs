@@ -74,7 +74,7 @@ pub unsafe fn va_to_pa(root: *mut PageTable, va: VirtAddr) -> PhysAddr {
     pt = (*pt).entries[vpn[2]].pt();
     pt = (*pt).entries[vpn[1]].pt();
     let pa = ((*pt).entries[vpn[0]].ppn() << 12) | (offset as u64);
-    PhysAddr::from_bits(pa)
+    PhysAddr::from(pa)
 }
 
 /// Map "n" page tables with n being the 
@@ -91,7 +91,7 @@ pub unsafe fn map_many(
     for _ in 0..num {
         map_page(root, va, pa, flags);
         pa.set_ppn(pa.ppn() + 1);
-        va = VirtAddr::from_bits(va.bits + (1 << 12));
+        va = VirtAddr::from(va.bits + 0x1000);
     }
 }
 
