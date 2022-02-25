@@ -23,15 +23,15 @@ pub fn init() {
 
         // map kernel text and rodata
         map_range(kern_pt, 
-            VirtAddr::from_bits(TEXT_START as u64),
-            VirtAddr::from_bits(RODATA_END as u64),
-            PhysAddr::from_bits(TEXT_START as u64), 
+            VirtAddr::from(TEXT_START),
+            VirtAddr::from(RODATA_END),
+            PhysAddr::from(TEXT_START), 
             PteFlags::RX);
 
         // map kernel rw data (data and bss)
         map_page(kern_pt, 
-            VirtAddr::from_bits(DATA_START as u64), 
-            PhysAddr::from_bits(DATA_START as u64), 
+            VirtAddr::from(DATA_START), 
+            PhysAddr::from(DATA_START), 
             PteFlags::RW);
 
         // map kernel heap
@@ -43,9 +43,9 @@ pub fn init() {
 
         // map kernel stack
         map_range(kern_pt, 
-            VirtAddr::from_bits(KSTACK_START as u64),
-            VirtAddr::from_bits(KSTACK_END as u64),
-            PhysAddr::from_bits(KSTACK_START as u64), 
+            VirtAddr::from(KSTACK_START),
+            VirtAddr::from(KSTACK_END),
+            PhysAddr::from(KSTACK_START), 
             PteFlags::RW);
 
         // map trampoline
@@ -56,24 +56,24 @@ pub fn init() {
 
         // map UART registers
         map_page(kern_pt, 
-            VirtAddr::from_bits(UART_BASE_ADDR as u64), 
-            PhysAddr::from_bits(UART_BASE_ADDR as u64), 
+            VirtAddr::from(UART_BASE_ADDR), 
+            PhysAddr::from(UART_BASE_ADDR), 
             PteFlags::RW);
 
         // map PLIC registers
         map_many(kern_pt,
-            VirtAddr::from_bits(PLIC_BASE_ADDR as u64), 
-            PhysAddr::from_bits(PLIC_BASE_ADDR as u64), 
+            VirtAddr::from(PLIC_BASE_ADDR), 
+            PhysAddr::from(PLIC_BASE_ADDR), 
             PteFlags::RW, 3);
         map_page(kern_pt, 
-            VirtAddr::from_bits((PLIC_BASE_ADDR + 0x20_1000) as u64), 
-            PhysAddr::from_bits((PLIC_BASE_ADDR + 0x20_1000) as u64), 
+            VirtAddr::from(PLIC_BASE_ADDR + 0x20_1000), 
+            PhysAddr::from(PLIC_BASE_ADDR + 0x20_1000), 
             PteFlags::RW);
 
         // turn on MMU
         riscv::register::satp::set(Mode::Sv39, 0, (kern_pt as usize) >> 12);
         
-        // flush TLBs
+        // flush TLB
         asm!("sfence.vma");
 
         log::debug!("Virtual memory initialized.");
