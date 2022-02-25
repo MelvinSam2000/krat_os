@@ -100,13 +100,13 @@ pub unsafe fn map_many(
 /// when only memory regions are known.
 pub unsafe fn map_range(
     root: *mut PageTable,
-    va_i: VirtAddr,
-    va_f: VirtAddr,
-    pa: PhysAddr,
+    va: VirtAddr,
+    pa_i: PhysAddr,
+    pa_f: PhysAddr,
     flags: PteFlags,
 ) {
-    let n = va_f.vpn0() - va_i.vpn0() + 1;
-    map_many(root, va_i, pa, flags, n as u64);
+    let n = pa_f.ppn() - pa_i.ppn() + 1;
+    map_many(root, va, pa_i, flags, n as u64);
 }
 
 /// Prints all entries of a given page table.
