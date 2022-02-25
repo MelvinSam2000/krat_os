@@ -24,28 +24,29 @@ pub fn init() {
         // map kernel text and rodata
         map_range(kern_pt, 
             VirtAddr::from(TEXT_START),
-            VirtAddr::from(RODATA_END),
             PhysAddr::from(TEXT_START), 
+            PhysAddr::from(RODATA_END),
             PteFlags::RX);
 
         // map kernel rw data (data and bss)
-        map_page(kern_pt, 
-            VirtAddr::from(DATA_START), 
+        map_range(kern_pt, 
+            VirtAddr::from(DATA_START),
             PhysAddr::from(DATA_START), 
+            PhysAddr::from(BSS_END),
             PteFlags::RW);
 
         // map kernel stack
         map_range(kern_pt, 
             VirtAddr::from(KSTACK_START),
-            VirtAddr::from(KSTACK_END),
             PhysAddr::from(KSTACK_START), 
+            PhysAddr::from(KSTACK_END),
             PteFlags::RW);
 
         // map kernel heap
         map_range(kern_pt, 
             VirtAddr::from(KHEAP_START),
-            VirtAddr::from(KHEAP_END),
             PhysAddr::from(KHEAP_START), 
+            PhysAddr::from(KHEAP_END),
             PteFlags::RW);
 
         // map UART registers
