@@ -49,11 +49,10 @@ pub fn init() {
             PteFlags::RW);
 
         // map trampoline
-        map_page(kern_pt, 
-            VirtAddr::from_bits(0xfffff000), 
+        map_many(kern_pt, 
+            VirtAddr::from_bits(TRAMPOLINE_VADDR as u64), 
             PhysAddr::from_bits(TRAMPOLINE_START as u64), 
-            PteFlags::RW | PteFlags::G);
-       
+            PteFlags::RWX | PteFlags::G, 4);
 
         // map UART registers
         map_page(kern_pt, 

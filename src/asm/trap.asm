@@ -1,4 +1,4 @@
-.section .trampoline.vec
+.section .text
 .global trap_vector
 .option norvc
 trap_vector:

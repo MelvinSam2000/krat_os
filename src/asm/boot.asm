@@ -15,9 +15,6 @@ entry:
     // clear bss section
     call    clear_bss
     
-    // set trap vector csr
-    la		t0, trap_vector
-    csrw	stvec, t0
 
     // go to Rust (kmain)
     call    kmain

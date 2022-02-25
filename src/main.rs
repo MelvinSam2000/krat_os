@@ -1,6 +1,6 @@
 #![no_std]
 #![no_main]
-#![feature(alloc_error_handler)]
+#![feature(alloc_error_handler, fn_align, naked_functions)]
 
 extern crate alloc;
 
@@ -13,7 +13,6 @@ use crate::memlayout::*;
 
 global_asm!(include_str!("asm/boot.asm"));
 global_asm!(include_str!("asm/mem.asm"));
-global_asm!(include_str!("asm/trap.asm"));
 
 /// Whenever there is a fatal kernel panic,
 /// this function is called. It also prints
@@ -56,14 +55,12 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
     logger::init();
     kheap::init();
     fdt::init(fdt_ptr);
-    trap::init();
     
     plic::init(PLIC_BASE_ADDR);
     
     unsafe { memlayout::print_sections() };
     vmem::init();
-
-    log::info!("It works! :D");
+    trap::init();
 
     sched::init();
     loop {}

@@ -43,14 +43,6 @@ SECTIONS
         PROVIDE(_rodata_end = .);
     } >RAM AT>RAM :rodata
 
-    .trampoline : ALIGN(4096)
-    {
-        PROVIDE(_trampoline_start = .);
-        *(.trampoline.vec)
-        *(.trampoline .trampoline.*)
-        PROVIDE(_trampoline_end = .);
-    } >RAM AT>RAM :trampoline
-
     .data : ALIGN(4096)
     {
         PROVIDE(_data_start = .);
@@ -65,6 +57,16 @@ SECTIONS
         *(.sbss .sbss.*)
         PROVIDE(_bss_end = .);
     } >RAM AT>RAM :bss
+
+    .trampoline : ALIGN(4096)
+    {
+        PROVIDE(_trampoline_start = .);
+        KEEP(*(.trampoline.vector))
+        KEEP(*(.trampoline.handler))
+        KEEP(*(.trampoline.data))
+        *(.trampoline .trampoline.*)
+        PROVIDE(_trampoline_end = .);
+    } >RAM AT>RAM :trampoline
 
     . = ALIGN(4096);
     PROVIDE(_kheap_start = .);
