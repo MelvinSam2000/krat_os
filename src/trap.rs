@@ -18,7 +18,8 @@ pub struct TrapFrame {
     pub fregs: [u64; 32],
     pub pc: u64,
     pub satp: u64,
-    pub trap_handler_ptr: u64
+    pub trap_handler_ptr: u64,
+    pub kern_satp: u64,
 }
 
 #[allow(unreachable_code, dead_code)]
@@ -29,6 +30,7 @@ static mut TRAP_FRAME: TrapFrame = TrapFrame {
     pc: 0,
     satp: 0,
     trap_handler_ptr: 0,
+    kern_satp: 0,
 };
 
 pub fn init() {
@@ -45,7 +47,12 @@ pub fn init() {
             "sd     t0, 528(t1)",
             in(reg) fptr, in(reg) sscratch_val,
         }
-        // TRAP_FRAME.trap_handler_ptr = (trap_handler as *const ()) as u64;
+
+        // load kernel root page to trap frame
+        asm! {
+            "csrr   t0, satp",
+            "sd     t0, 536(t1)",
+        }
     
         // Configure trap vector
         riscv::register::stvec::write(TRAMP_VADDR, TrapMode::Direct);
@@ -162,12 +169,26 @@ unsafe extern "C" fn trap_vector() -> ! {
         csrr    a2, stval
         csrr    a3, sstatus
 
+        // swap to kernel pages
+        ld      t0, 536(x31)
+        csrw    satp, t0
+        // sfence.vma
+        
         // restore sscratch
-        csrw    sscratch, x31
+        mv      t0, x31      
+        csrrw   x31, sscratch, x31
 
         // enter Rust trap_handler
-        ld      t0, 528(x31)
+        ld      t0, 528(t0)
         jalr    t0
+
+        // get sscratch
+        csrr    x31, sscratch
+
+        // swap to user pages
+        ld      t0, 520(x31)
+        csrw    satp, t0
+        // sfence.vma
     
         // update return pc
         csrw    sepc, a0
