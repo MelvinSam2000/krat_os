@@ -1,3 +1,5 @@
+// KERNEL EXEC SECTIONS
+
 .section .rodata
 
 .global TEXT_START
@@ -12,9 +14,6 @@ DATA_START: .dword _data_start
 .global DATA_END
 DATA_END: .dword _data_end
 
-.global GLOBAL_POINTER
-GLOBAL_POINTER: .dword _global_pointer
-
 .global RODATA_START
 RODATA_START: .dword _rodata_start
 
@@ -27,11 +26,7 @@ BSS_START: .dword _bss_start
 .global BSS_END
 BSS_END: .dword _bss_end
 
-.global TRAMPOLINE_START
-TRAMPOLINE_START: .dword _trampoline_start
-
-.global TRAMPOLINE_END
-TRAMPOLINE_END: .dword _trampoline_end
+// KERNEL RW MEMORY SECTIONS
 
 .global KHEAP_START
 KHEAP_START: .dword _kheap_start
@@ -50,3 +45,14 @@ UMEMORY_START: .dword _umemory_start
 
 .global UMEMORY_END
 UMEMORY_END: .dword _umemory_end
+
+// Other symbols
+
+.global GLOBAL_POINTER
+GLOBAL_POINTER: .dword _global_pointer
+
+.global TRAMP_VECTOR
+TRAMP_VECTOR: .dword _tramp_vector
+
+.global TRAMP_FRAME
+TRAMP_FRAME: .dword _tramp_frame

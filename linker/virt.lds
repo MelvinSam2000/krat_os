@@ -9,7 +9,6 @@ PHDRS
 {
     text PT_LOAD;
     rodata PT_LOAD;
-    trampoline PT_LOAD;
     data PT_LOAD;
     bss PT_LOAD;
 }
@@ -30,16 +29,26 @@ SECTIONS
     .text : ALIGN(8)
     {
         PROVIDE(_text_start = .);
-        *(.text.init)
+        KEEP(*(.text.init))
         *(.text .text.*)
+
+        . = ALIGN(4096);
+        PROVIDE(_tramp_vector = .);
+        KEEP(*(.tramp.vector))
+        
+        . = ALIGN(4096);
+        PROVIDE(_tramp_frame = .);
+        KEEP(*(.tramp.frame))
+
         PROVIDE(_text_end = .);
     } >RAM AT>RAM :text
 
-    .rodata : ALIGN(8)
+    .rodata : ALIGN(4096)
     {
         PROVIDE(_global_pointer = .);
         PROVIDE(_rodata_start = .);
         *(.rodata .rodata.*)
+        *(.srodata .srodata.*)
         PROVIDE(_rodata_end = .);
     } >RAM AT>RAM :rodata
 
@@ -47,6 +56,7 @@ SECTIONS
     {
         PROVIDE(_data_start = .);
         *(.data .data.*)
+        *(.sdata .sdata.*)
         PROVIDE(_data_end = .);
     } >RAM AT>RAM :data
 
@@ -57,16 +67,6 @@ SECTIONS
         *(.sbss .sbss.*)
         PROVIDE(_bss_end = .);
     } >RAM AT>RAM :bss
-
-    .trampoline : ALIGN(4096)
-    {
-        PROVIDE(_trampoline_start = .);
-        KEEP(*(.trampoline.vector))
-        KEEP(*(.trampoline.handler))
-        KEEP(*(.trampoline.data))
-        *(.trampoline .trampoline.*)
-        PROVIDE(_trampoline_end = .);
-    } >RAM AT>RAM :trampoline
 
     . = ALIGN(4096);
     PROVIDE(_kheap_start = .);

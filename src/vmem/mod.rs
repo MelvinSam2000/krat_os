@@ -21,12 +21,18 @@ pub fn init() {
             panic!("Unable to allocate kernel root page table.");
         }
 
-        // map kernel text and rodata
+        // map kernel text
         map_range(kern_pt, 
             VirtAddr::from(TEXT_START),
             PhysAddr::from(TEXT_START), 
-            PhysAddr::from(RODATA_END),
+            PhysAddr::from(TEXT_END),
             PteFlags::RX);
+
+        map_range(kern_pt, 
+            VirtAddr::from(RODATA_START),
+            PhysAddr::from(RODATA_START), 
+            PhysAddr::from(RODATA_END),
+            PteFlags::R);
 
         // map kernel rw data (data and bss)
         map_range(kern_pt, 
@@ -35,11 +41,27 @@ pub fn init() {
             PhysAddr::from(BSS_END),
             PteFlags::RW);
 
+
+        // map trampoline text
+        map_range(kern_pt, 
+            VirtAddr::from(TRAMP_VADDR), 
+            PhysAddr::from(TRAMP_VECTOR),
+            PhysAddr::from(TRAMP_FRAME - 1),
+            PteFlags::RX | PteFlags::G);
+
+        // map trampoline data
+        map_page(kern_pt, 
+            VirtAddr::from(TRAMP_VADDR + (
+                TRAMP_FRAME - TRAMP_VECTOR
+            )), 
+            PhysAddr::from(TRAMP_FRAME),
+            PteFlags::RW | PteFlags::G);
+
         // map kernel heap
         map_range(kern_pt, 
-            VirtAddr::from_bits(KHEAP_START as u64),
-            VirtAddr::from_bits(KHEAP_END as u64),
-            PhysAddr::from_bits(KHEAP_START as u64), 
+            VirtAddr::from(KHEAP_START),
+            PhysAddr::from(KHEAP_START), 
+            PhysAddr::from(KHEAP_END),
             PteFlags::RW);
 
         // map kernel stack
@@ -48,12 +70,6 @@ pub fn init() {
             PhysAddr::from(KSTACK_START), 
             PhysAddr::from(KSTACK_END),
             PteFlags::RW);
-
-        // map trampoline
-        map_many(kern_pt, 
-            VirtAddr::from_bits(TRAMPOLINE_VADDR as u64), 
-            PhysAddr::from_bits(TRAMPOLINE_START as u64), 
-            PteFlags::RWX | PteFlags::G, 4);
 
         // map UART registers
         map_page(kern_pt, 

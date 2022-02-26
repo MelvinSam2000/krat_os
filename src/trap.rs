@@ -12,34 +12,48 @@ use crate::sched::sched;
 use crate::memlayout::*;
 
 #[derive(Clone, Copy, Debug, Default)]
-#[repr(C, align(4096))]
+#[repr(C)]
 pub struct TrapFrame {
     pub gregs: [u64; 32],
     pub fregs: [u64; 32],
     pub pc: u64,
     pub satp: u64,
+    pub trap_handler_ptr: u64
 }
 
-#[link_section = ".trampoline.data"]
+#[allow(unreachable_code, dead_code)]
+#[link_section = ".tramp.frame"]
 static mut TRAP_FRAME: TrapFrame = TrapFrame {
     gregs: [0; 32],
     fregs: [0; 32],
     pc: 0,
     satp: 0,
+    trap_handler_ptr: 0,
 };
 
 pub fn init() {
 
-    // Configure trap vector
     unsafe {
-        riscv::register::stvec::write(TRAMPOLINE_VADDR, TrapMode::Direct);
-    }
 
-    // Store trap frame into sscratch
-    riscv::register::sscratch::write(0xfffff000);
+        let sscratch_val = TRAMP_VADDR + (TRAMP_FRAME - TRAMP_VECTOR);
+        let fptr = (trap_handler as *const ()) as u64;
+        
+        // load trap handler function pointer to trap frame
+        asm! {
+            "mv     t0, {}", 
+            "mv     t1, {}", 
+            "sd     t0, 528(t1)",
+            in(reg) fptr, in(reg) sscratch_val,
+        }
+        // TRAP_FRAME.trap_handler_ptr = (trap_handler as *const ()) as u64;
+    
+        // Configure trap vector
+        riscv::register::stvec::write(TRAMP_VADDR, TrapMode::Direct);
 
-    // Enable interrupts
-    unsafe {
+        // Store trap frame into sscratch
+        riscv::register::sscratch::write(sscratch_val);
+
+        // Enable interrupts
         asm! {
             // enable all interrupt types
             "li     t0, (1 << 9) | (1 << 5) | (1 << 1)",
@@ -48,13 +62,12 @@ pub fn init() {
             "csrsi  sstatus, 1 << 1",
         }
     }
-
 }
 
 
 #[naked]
 #[no_mangle]
-#[link_section = ".trampoline.vector"]
+#[link_section = ".tramp.vector"]
 #[repr(align(4))]
 unsafe extern "C" fn trap_vector() -> ! {
     // asm!(include_str!("asm/trap.asm"), options(noreturn));
@@ -153,8 +166,9 @@ unsafe extern "C" fn trap_vector() -> ! {
         csrw    sscratch, x31
 
         // enter Rust trap_handler
-        call    trap_handler
-
+        ld      t0, 528(x31)
+        jalr    t0
+    
         // update return pc
         csrw    sepc, a0
 
@@ -238,7 +252,7 @@ unsafe extern "C" fn trap_vector() -> ! {
 /// jumps to this function after saving the trap
 /// frame in order to be able to handle all supervisor
 /// traps in Rust.
-#[link_section = ".trampoline.handler"]
+// #[link_section = ".trampoline.handler"]
 #[no_mangle]
 extern "C"
 fn trap_handler(
