@@ -77,3 +77,4 @@ pub mod fdt;
 pub mod plic;
 pub mod proc;
 pub mod sched;
+pub mod syscall;

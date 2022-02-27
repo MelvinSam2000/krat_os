@@ -11,7 +11,6 @@ pub enum ProcessState {
 
 pub struct Process {
     pub pid: u64,
-    pub pc: u64,
     pub context: TrapFrame,
     pub state: ProcessState,
 }
@@ -19,12 +18,13 @@ pub struct Process {
 impl Process {
 
     pub fn spawn(pid: u64) -> Self {
+        
         let mut proc = Process {
             pid,
-            pc: 0,
             context: Default::default(),
             state: ProcessState::Creating,
         };
+
         proc.state = ProcessState::Ready;
         proc
     }

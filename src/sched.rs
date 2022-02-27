@@ -23,15 +23,13 @@ pub fn init() -> Option<()> {
 
         // create init process
         let mut pidle = Process::spawn(0);
-        pidle.pc = (idle as *const ()) as u64;
+        pidle.context.pc = (idle as *const ()) as u64;
         SCHED.tasks.as_mut()?.push_back(Box::new(pidle));
 
         // create p1 and p2 dummy processes
         let mut p1 = Process::spawn(1);
-        p1.pc = (fp1 as *const ()) as u64;
         SCHED.tasks.as_mut()?.push_back(Box::new(p1));
         let mut p2 = Process::spawn(2);
-        p2.pc = (fp2 as *const ()) as u64;
         SCHED.tasks.as_mut()?.push_back(Box::new(p2));
         
         // begin timer interrupts
@@ -98,16 +96,4 @@ pub fn sched(trap_frame: &mut TrapFrame) -> Option<()> {
 
 unsafe fn idle() -> ! {
     loop { asm!("wfi") };
-}
-
-unsafe fn fp1() -> ! {
-    loop {
-        // log::info!("THIS IS P1 :)");
-    }
-}
-
-unsafe fn fp2() -> ! {
-    loop {
-        // log::info!("THIS IS P2 :(");
-    }
 }

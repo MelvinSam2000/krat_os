@@ -9,6 +9,7 @@ use crate::plic;
 use crate::uart;
 use crate::uart_print;
 use crate::sched::sched;
+use crate::syscall::do_syscall;
 use crate::memlayout::*;
 
 #[derive(Clone, Copy, Debug, Default)]
@@ -372,6 +373,9 @@ fn trap_handler(
             8 => {
                 // Environment call from U-mode.
                 log::info!("Environment call from U-mode.");
+                // ra = do_syscall(a7, a0-a6)
+                trap_frame.gregs[1] = do_syscall(
+                    trap_frame.gregs[17], &trap_frame.gregs[10..16]);
             },
             9 => {
                 // Environment call from S-mode.
