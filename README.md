@@ -28,26 +28,22 @@ cargo run
 
 ### Low priority
 
-<<<<<<< Updated upstream
-- [x] Replace physical page allocator with free lists
 - [ ] Fix virtual page deallocation
-=======
-- [ ] Replace physical page allocator with free lists
->>>>>>> Stashed changes
 - [ ] Implement fdt parser
+- [ ] Refactor code
+- [ ] Elf parser
+- [ ] Userspace library
+- [ ] Userspace programs
+- [ ] Decide monolith or microkernel
 
 ### High priority
 
 - [x] Fix timer interrupt
 - [x] Fix PLIC 
 - [x] Better logging
-<<<<<<< Updated upstream
 - [ ] Proper debug logging
-=======
-- [ ] Proper Debug logging
->>>>>>> Stashed changes
-- [ ] Basic Syscalls
-- [ ] Basic Scheduler
+- [x] Basic Syscalls
+- [x] Basic Scheduler
 
 ## Contributing
 
