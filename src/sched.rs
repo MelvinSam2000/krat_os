@@ -20,17 +20,6 @@ pub fn init() -> Option<()> {
     unsafe {
 
         SCHED.tasks = Some(VecDeque::new());
-
-        // create init process
-        let mut pidle = Process::spawn(0);
-        pidle.context.pc = (idle as *const ()) as u64;
-        SCHED.tasks.as_mut()?.push_back(Box::new(pidle));
-
-        // create p1 and p2 dummy processes
-        let mut p1 = Process::spawn(1);
-        SCHED.tasks.as_mut()?.push_back(Box::new(p1));
-        let mut p2 = Process::spawn(2);
-        SCHED.tasks.as_mut()?.push_back(Box::new(p2));
         
         // begin timer interrupts
         asm! {
@@ -53,6 +42,23 @@ pub fn init() -> Option<()> {
 pub fn sched(trap_frame: &mut TrapFrame) -> Option<()> {
 
     unsafe {
+
+        if SCHED.tasks.as_ref()?.is_empty() {
+            log::info!("No tasks to schedule...");
+            asm! {
+                // add time
+                "csrr   t0, time",
+                "li     t1, 5000000",
+                "add    t0, t0, t1",
+                // call sbi sbi_set_time(time + 1000000)
+                "li     a6, 0",
+                "li     a7, 0x54494d45",
+                "mv     a0, t0",
+                "ecall",
+            }
+            return Some(());
+        }
+
         // stop current process
         let mut task = SCHED.tasks.as_mut()?.front_mut()?;
         task.state = ProcessState::Ready;
@@ -92,8 +98,4 @@ pub fn sched(trap_frame: &mut TrapFrame) -> Option<()> {
         // *trap_frame = task.context;
         Some(())
     }
-}
-
-unsafe fn idle() -> ! {
-    loop { asm!("wfi") };
 }

@@ -352,7 +352,7 @@ fn trap_handler(
             },
             4 => {
                 // Load address misaligned.
-                log::error!("Load address misaligned.");
+                panic!("Load address misaligned at {:#010x}", stval);
             },
             5 => {
                 // Load access fault.
@@ -362,7 +362,7 @@ fn trap_handler(
             },
             6 => {
                 // Store/AMO address misaligned.
-                log::error!("Store/AMO address misaligned.");
+                panic!("Store/AMO address misaligned at {:#010x}", stval);
             },
             7 => {
                 // Store/AMO access fault.

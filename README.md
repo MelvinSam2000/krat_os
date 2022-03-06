@@ -35,6 +35,8 @@ cargo run
 - [ ] Userspace library
 - [ ] Userspace programs
 - [ ] Decide monolith or microkernel
+- [ ] Study virtio and file system
+- [ ] Enable multicore
 
 ### High priority
 
