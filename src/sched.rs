@@ -4,6 +4,9 @@ use alloc::boxed::Box;
 
 use crate::proc::*;
 use crate::trap::TrapFrame;
+use crate::riscv::timer_int;
+
+const SCHED_TIME_SLICE_USEC: usize = 1000000;
 
 // Round Robin scheduler
 struct Scheduler {
@@ -18,25 +21,15 @@ static mut SCHED: Scheduler = Scheduler {
 pub fn init() -> Option<()> {
 
     unsafe {
-
         SCHED.tasks = Some(VecDeque::new());
-        
-        // begin timer interrupts
-        asm! {
-            // add time
-            "csrr   t0, time",
-            "li     t1, 1000000",
-            "add    t0, t0, t1",
-            // call sbi sbi_set_time(time + 1000000)
-            "li     a6, 0",
-            "li     a7, 0x54494d45",
-            "mv     a0, t0",
-            "ecall",
-        }
-
-        log::info!("Scheduler initialized.");
-        loop {}
     }
+    
+    // begin timer interrupts
+    timer_int(SCHED_TIME_SLICE_USEC);
+
+    log::info!("Scheduler initialized.");
+    loop {}
+    
 }
 
 pub fn sched(trap_frame: &mut TrapFrame) -> Option<()> {
@@ -45,17 +38,7 @@ pub fn sched(trap_frame: &mut TrapFrame) -> Option<()> {
 
         if SCHED.tasks.as_ref()?.is_empty() {
             log::info!("No tasks to schedule...");
-            asm! {
-                // add time
-                "csrr   t0, time",
-                "li     t1, 5000000",
-                "add    t0, t0, t1",
-                // call sbi sbi_set_time(time + 1000000)
-                "li     a6, 0",
-                "li     a7, 0x54494d45",
-                "mv     a0, t0",
-                "ecall",
-            }
+            timer_int(SCHED_TIME_SLICE_USEC);
             return Some(());
         }
 
@@ -77,18 +60,6 @@ pub fn sched(trap_frame: &mut TrapFrame) -> Option<()> {
             SCHED.tasks.as_mut()?.rotate_left(1);
         }
     
-        // fire timer interrupt
-        asm! {
-            // add time
-            "csrr   t0, time",
-            "li     t1, 5000000",
-            "add    t0, t0, t1",
-            // call sbi sbi_set_time(time + 1000000)
-            "li     a6, 0",
-            "li     a7, 0x54494d45",
-            "mv     a0, t0",
-            "ecall",
-        }
 
         log::info!("Scheduling process {}", SCHED.tasks.as_mut()?.front()?.pid);
         
@@ -96,6 +67,9 @@ pub fn sched(trap_frame: &mut TrapFrame) -> Option<()> {
         let mut task = SCHED.tasks.as_mut()?.front_mut()?;
         task.state = ProcessState::Running;
         // *trap_frame = task.context;
+
+        timer_int(SCHED_TIME_SLICE_USEC);
+
         Some(())
     }
 }

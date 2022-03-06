@@ -31,7 +31,6 @@ fn panic_handler(info: &PanicInfo) -> ! {
             }
         }
     }
-    
 }
 
 /// Error handler for kernel heap allocation.
@@ -58,7 +57,7 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
     
     plic::init(PLIC_BASE_ADDR);
     
-    unsafe { memlayout::print_sections() };
+    memlayout::print_sections();
     vmem::init();
     trap::init();
 
@@ -78,3 +77,4 @@ pub mod plic;
 pub mod proc;
 pub mod sched;
 pub mod syscall;
+pub mod riscv;

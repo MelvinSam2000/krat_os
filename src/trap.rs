@@ -77,6 +77,7 @@ pub fn init() {
 #[no_mangle]
 #[link_section = ".tramp.vector"]
 #[repr(align(4))]
+// Safety:: Is an assembly function
 unsafe extern "C" fn trap_vector() -> ! {
     // asm!(include_str!("asm/trap.asm"), options(noreturn));
     
