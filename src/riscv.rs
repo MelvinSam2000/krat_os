@@ -1,3 +1,5 @@
+use riscv::register::satp::Mode;
+
 use core::arch::asm;
 
 /// Send a timer interrupt "usec" microseconds from now
@@ -19,5 +21,14 @@ pub fn timer_int(usec: usize) {
             "ecall",
             in(reg) usec
         }
+    }
+}
+
+/// Set MMU
+pub fn mmu_set(addr: usize) {
+    // Safety: Setting SATP register and flushing TLB
+    unsafe {
+        riscv::register::satp::set(Mode::Sv39, 0, (addr as usize) >> 12);
+        asm!("sfence.vma");
     }
 }

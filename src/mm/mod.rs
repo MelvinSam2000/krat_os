@@ -1,11 +1,8 @@
-use riscv::register::satp::Mode;
-
-use core::arch::asm;
-
 use crate::memlayout::*;
-use crate::vmem::pte::*;
-use crate::vmem::addr::*;
-use crate::vmem::virt::*;
+use crate::mm::pte::*;
+use crate::mm::addr::*;
+use crate::mm::virt::*;
+use crate::riscv::mmu_set;
 
 /// Initialize virtual memory.
 /// 1. Initialize physical page allocator.
@@ -88,11 +85,7 @@ pub fn init() {
             PteFlags::RW);
 
         // turn on MMU
-        riscv::register::satp::set(Mode::Sv39, 0, (kern_pt as usize) >> 12);
-        
-        // flush TLB
-        asm!("sfence.vma");
-
+        mmu_set(kern_pt as usize);
         log::debug!("Virtual memory initialized.");
     }
 }

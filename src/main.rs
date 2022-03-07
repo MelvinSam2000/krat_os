@@ -58,7 +58,7 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
     plic::init(PLIC_BASE_ADDR);
     
     memlayout::print_sections();
-    vmem::init();
+    mm::init();
     trap::init();
 
     sched::init();
@@ -69,7 +69,7 @@ pub mod logger;
 pub mod macros;
 pub mod memlayout;
 pub mod uart;
-pub mod vmem;
+pub mod mm;
 pub mod kheap;
 pub mod trap;
 pub mod fdt;

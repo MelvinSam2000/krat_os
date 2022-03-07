@@ -43,9 +43,6 @@ KSTACK_END: .dword _kstack_end
 .global UMEMORY_START
 UMEMORY_START: .dword _umemory_start
 
-.global UMEMORY_END
-UMEMORY_END: .dword _umemory_end
-
 // Other symbols
 
 .global GLOBAL_POINTER

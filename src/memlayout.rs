@@ -19,8 +19,8 @@ extern "C" {
     pub static KSTACK_START: usize;
     pub static KSTACK_END: usize;
     pub static UMEMORY_START: usize;
-    pub static UMEMORY_END: usize;
 }
+pub static mut UMEMORY_END: usize = 0;
 
 pub const TRAMP_VADDR: usize = 0x0000_1000;
 
@@ -43,7 +43,7 @@ pub fn print_sections() {
         out += &format!("BSS:           {:#010x} .. {:#010x}\n", BSS_START, BSS_END);
         out += &format!("KHEAP:         {:#010x} .. {:#010x}\n", KHEAP_START, KHEAP_END);
         out += &format!("KSTACK:        {:#010x} .. {:#010x}\n", KSTACK_START, KSTACK_END);
-        out += &format!("UMEMORY:       {:#010x} .. {:#010x}\n", UMEMORY_START, UMEMORY_END);
+        out += &format!("USER PAGES:    {:#010x} .. {:#010x}\n", UMEMORY_START, UMEMORY_END);
         out += &format!("=======================================");
         log::info!("{}", out);
     }

@@ -37,7 +37,7 @@ pub fn sched(trap_frame: &mut TrapFrame) -> Option<()> {
     unsafe {
 
         if SCHED.tasks.as_ref()?.is_empty() {
-            log::info!("No tasks to schedule...");
+            // log::info!("No tasks to schedule...");
             timer_int(SCHED_TIME_SLICE_USEC);
             return Some(());
         }

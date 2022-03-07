@@ -1,8 +1,7 @@
-use crate::vmem::phys;
 use crate::uart_print;
-
-use crate::vmem::pte::*;
-use crate::vmem::addr::*;
+use crate::mm::phys;
+use crate::mm::pte::*;
+use crate::mm::addr::*;
 
 #[repr(C)]
 pub struct PageTable {

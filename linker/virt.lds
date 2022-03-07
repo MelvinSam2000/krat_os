@@ -21,11 +21,7 @@ MEMORY
 SECTIONS
 {
     PROVIDE(_memory_start = ORIGIN(RAM));
-    PROVIDE(_memory_end = 0x8fff0000);
 
-    /* ^ quick fix, cant access > 0x90000000, need to implement fdt
-    PROVIDE(_memory_end = ORIGIN(RAM) + LENGTH(RAM));
-    */
     .text : ALIGN(8)
     {
         PROVIDE(_text_start = .);
@@ -76,5 +72,4 @@ SECTIONS
     PROVIDE(_kstack_end = _kstack_start + KSTACK_SIZE - 1);
 
     PROVIDE(_umemory_start = _kstack_end + 1);
-    PROVIDE(_umemory_end = _memory_end - 1);
 }

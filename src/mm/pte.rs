@@ -3,7 +3,7 @@ use alloc::string::String;
 
 use core::fmt;
 
-use crate::vmem::PageTable;
+use crate::mm::PageTable;
 
 bitflags! {
     pub struct PteFlags: u8 {

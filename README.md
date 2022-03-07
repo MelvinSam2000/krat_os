@@ -37,6 +37,7 @@ cargo run
 - [ ] Decide monolith or microkernel
 - [ ] Study virtio and file system
 - [ ] Enable multicore
+- [ ] Replace trampoline by mapping entire kernel globally
 
 ### High priority
 

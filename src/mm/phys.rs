@@ -1,10 +1,8 @@
 use alloc::string::String;
 use alloc::format;
 
-extern "C" {
-    static UMEMORY_START: usize;
-    static UMEMORY_END: usize;
-}
+use crate::memlayout::UMEMORY_START;
+use crate::memlayout::UMEMORY_END;
 
 #[repr(C, align(4096))]
 struct FreeListNode {
