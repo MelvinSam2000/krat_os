@@ -24,6 +24,7 @@ fn panic_handler(info: &PanicInfo) -> ! {
     log::error!("FATAL - Kernel Panic:");
     log::error!("{}", info);
     loop {
+        // Safety: Disabling interrupts and "halting" processor safely
         unsafe {
             asm! {
                 "csrci  sstatus, 1 << 1",

@@ -300,6 +300,7 @@ fn trap_handler(
             1 => {
                 // Supervisor software interrupt.
                 log::info!("Supervisor software interrupt.");
+                // Safety: Clearing software interrupt bit
                 unsafe { asm! {
                     "csrci  sip, 1 << 1",
                 }}
@@ -307,7 +308,7 @@ fn trap_handler(
             5 => {
                 // Supervisor timer interrupt.
                 log::debug!("Supervisor timer interrupt.");
-                sched(trap_frame).unwrap();
+                sched(trap_frame);
             },
             9 => {
                 // Supervisor external interrupt.

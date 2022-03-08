@@ -32,6 +32,7 @@ pub static UART_BASE_ADDR: usize = 0x1000_0000;
 /// Prints the memory layout as specified in the linker script.
 #[cfg(debug_assertions)]
 pub fn print_sections() {
+    // Safety: Extern variables are well defined by the linker script
     unsafe {
         let mut out = String::from("Memory layout: \n");
         out += &format!("=======================================\n");

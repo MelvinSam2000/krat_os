@@ -25,6 +25,7 @@ pub fn init() {
             PhysAddr::from(TEXT_END),
             PteFlags::RX);
 
+        // map kernel rodata
         map_range(kern_pt, 
             VirtAddr::from(RODATA_START),
             PhysAddr::from(RODATA_START), 
