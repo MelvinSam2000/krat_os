@@ -47,6 +47,7 @@ cargo run
 - [ ] Proper debug logging
 - [x] Basic Syscalls
 - [x] Basic Scheduler
+- [ ] Enable 32 bit compatability
 
 ## Contributing
 
