@@ -51,12 +51,12 @@ fn alloc_error_handler(layout: Layout) -> ! {
 extern "C"
 fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
     
-    uart::init(UART_BASE_ADDR);
+    drivers::uart::init(UART_BASE_ADDR);
     logger::init();
     kheap::init();
     fdt::init(fdt_ptr);
     
-    plic::init(PLIC_BASE_ADDR);
+    drivers::plic::init(PLIC_BASE_ADDR);
     
     memlayout::print_sections();
     mm::init();
@@ -69,13 +69,12 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
 pub mod logger;
 pub mod macros;
 pub mod memlayout;
-pub mod uart;
 pub mod mm;
 pub mod kheap;
 pub mod trap;
 pub mod fdt;
-pub mod plic;
 pub mod proc;
 pub mod sched;
 pub mod syscall;
 pub mod riscv;
+pub mod drivers;

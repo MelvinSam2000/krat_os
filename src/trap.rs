@@ -5,8 +5,8 @@ use core::arch::asm;
 use alloc::string::String;
 use alloc::format;
 
-use crate::plic;
-use crate::uart;
+use crate::drivers::plic;
+use crate::drivers::uart;
 use crate::uart_print;
 use crate::sched::sched;
 use crate::syscall::do_syscall;
