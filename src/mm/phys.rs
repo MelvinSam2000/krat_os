@@ -1,8 +1,8 @@
-use alloc::string::String;
 use alloc::format;
+use alloc::string::String;
 
-use crate::memlayout::UMEMORY_START;
 use crate::memlayout::UMEMORY_END;
+use crate::memlayout::UMEMORY_START;
 
 #[repr(C, align(4096))]
 struct FreeListNode {
@@ -48,7 +48,6 @@ pub unsafe fn alloc() -> *mut u8 {
         // clear page
         clear_page(((head as usize) >> 12) << 12);
         return head as *mut u8;
-
     } else {
         panic!("Cannot allocated more pages.");
     }
@@ -67,7 +66,7 @@ pub unsafe fn dealloc(page_ptr: *mut u8) {
 // Fill page with zero
 unsafe fn clear_page(ptr: usize) {
     for i in 0..512 {
-        *((ptr + 8*i) as *mut u64) = 0;
+        *((ptr + 8 * i) as *mut u64) = 0;
     }
 }
 

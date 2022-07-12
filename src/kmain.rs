@@ -4,10 +4,10 @@
 
 extern crate alloc;
 
-use core::panic::PanicInfo;
-use core::arch::global_asm;
-use core::arch::asm;
 use alloc::alloc::Layout;
+use core::arch::asm;
+use core::arch::global_asm;
+use core::panic::PanicInfo;
 
 use crate::memlayout::*;
 
@@ -16,11 +16,10 @@ global_asm!(include_str!("asm/mem.asm"));
 
 /// Whenever there is a fatal kernel panic,
 /// this function is called. It also prints
-/// panic info. 
+/// panic info.
 #[panic_handler]
 #[no_mangle]
-extern "C" 
-fn panic_handler(info: &PanicInfo) -> ! {
+extern "C" fn panic_handler(info: &PanicInfo) -> ! {
     log::error!("FATAL - Kernel Panic:");
     log::error!("{}", info);
     loop {
@@ -48,16 +47,14 @@ fn alloc_error_handler(layout: Layout) -> ! {
 /// function to be called when the kernel
 /// enters Rust.
 #[no_mangle]
-extern "C"
-fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
-    
+extern "C" fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
     drivers::uart::init(UART_BASE_ADDR);
     logger::init();
     kheap::init();
     fdt::init(fdt_ptr);
-    
+
     drivers::plic::init(PLIC_BASE_ADDR);
-    
+
     memlayout::print_sections();
     mm::init();
     trap::init();
@@ -66,15 +63,15 @@ fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
     loop {}
 }
 
+pub mod drivers;
+pub mod fdt;
+pub mod kheap;
 pub mod logger;
 pub mod macros;
 pub mod memlayout;
 pub mod mm;
-pub mod kheap;
-pub mod trap;
-pub mod fdt;
 pub mod proc;
+pub mod riscv;
 pub mod sched;
 pub mod syscall;
-pub mod riscv;
-pub mod drivers;
+pub mod trap;

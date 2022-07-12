@@ -1,7 +1,7 @@
-use crate::uart_print;
+use crate::mm::addr::*;
 use crate::mm::phys;
 use crate::mm::pte::*;
-use crate::mm::addr::*;
+use crate::uart_print;
 
 #[repr(C)]
 pub struct PageTable {
@@ -10,13 +10,7 @@ pub struct PageTable {
 
 /// Creates a 3 level mapping of va to pa, using
 /// the page table entries from the root provided.
-pub unsafe fn map_page(
-    root: *mut PageTable, 
-    va: VirtAddr, 
-    pa: PhysAddr, 
-    flags: PteFlags
-) {
-
+pub unsafe fn map_page(root: *mut PageTable, va: VirtAddr, pa: PhysAddr, flags: PteFlags) {
     let vpn = va.vpn();
     let mut pte = Pte::new();
     let mut pt = root;
@@ -36,9 +30,12 @@ pub unsafe fn map_page(
     }
 
     if (*pt).entries[vpn[0]].is_valid() {
-        panic!("map_page: Double mapping of page {:#010x} at {:#010x}\n", pt as usize, vpn[0]);
+        panic!(
+            "map_page: Double mapping of page {:#010x} at {:#010x}\n",
+            pt as usize, vpn[0]
+        );
     }
-    
+
     pte.set_ppn(pa.ppn());
     pte.set_flags(flags | PteFlags::V);
     (*pt).entries[vpn[0]] = pte;
@@ -47,7 +44,6 @@ pub unsafe fn map_page(
 /// Unmap a virtual address from the page table.
 /// Assume the virtual address is indeed present, otherwise panic.
 pub unsafe fn unmap_page(root: *mut PageTable, va: VirtAddr) {
-    
     let vpn = va.vpn();
     let mut pt = root;
     pt = (*pt).entries[vpn[2]].pt();
@@ -66,7 +62,6 @@ pub unsafe fn unmap_page(root: *mut PageTable, va: VirtAddr) {
 /// Currently it is assumed that the mapping is present,
 /// so no faulting/panic is implemented.
 pub unsafe fn va_to_pa(root: *mut PageTable, va: VirtAddr) -> PhysAddr {
-
     let vpn = va.vpn();
     let offset = va.page_offset();
     let mut pt = root;
@@ -76,7 +71,7 @@ pub unsafe fn va_to_pa(root: *mut PageTable, va: VirtAddr) -> PhysAddr {
     PhysAddr::from(pa)
 }
 
-/// Map "n" page tables with n being the 
+/// Map "n" page tables with n being the
 /// number of pages.
 pub unsafe fn map_many(
     root: *mut PageTable,
@@ -128,7 +123,7 @@ pub unsafe fn print_pts_dfs(pt: *mut PageTable, lvl: u8) {
     }
     for entry in (*pt).entries.iter() {
         if entry.is_valid() {
-            print_pts_dfs((entry.ppn() << 12) as *mut PageTable , lvl - 1);
+            print_pts_dfs((entry.ppn() << 12) as *mut PageTable, lvl - 1);
         }
     }
 }

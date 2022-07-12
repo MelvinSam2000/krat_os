@@ -1,11 +1,10 @@
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct VirtAddr {
-    pub bits: u64
+    pub bits: u64,
 }
 
 impl VirtAddr {
-
     pub fn new() -> Self {
         Self { bits: 0 }
     }
@@ -23,7 +22,11 @@ impl VirtAddr {
     }
 
     pub fn vpn(&self) -> [usize; 3] {
-        [self.vpn0() as usize, self.vpn1() as usize, self.vpn2() as usize]
+        [
+            self.vpn0() as usize,
+            self.vpn1() as usize,
+            self.vpn2() as usize,
+        ]
     }
 
     pub fn page_offset(&self) -> u64 {
@@ -46,11 +49,10 @@ impl From<usize> for VirtAddr {
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct PhysAddr {
-    pub bits: u64
+    pub bits: u64,
 }
 
 impl PhysAddr {
-
     pub fn new() -> Self {
         Self { bits: 0 }
     }

@@ -1,12 +1,11 @@
-use spin::Mutex;
-use lazy_static::lazy_static;
-
-use core::arch::asm;
 use alloc::collections::vec_deque::VecDeque;
 
+use lazy_static::lazy_static;
+use spin::Mutex;
+
 use crate::proc::*;
-use crate::trap::TrapFrame;
 use crate::riscv::timer_int;
+use crate::trap::TrapFrame;
 
 const SCHED_TIME_SLICE_USEC: usize = 1000000;
 
@@ -17,13 +16,13 @@ struct Scheduler {
 
 lazy_static! {
     static ref SCHED: Mutex<Scheduler> = {
-        Mutex::new(Scheduler { tasks: VecDeque::new() })
+        Mutex::new(Scheduler {
+            tasks: VecDeque::new(),
+        })
     };
 }
 
-
 pub fn init() {
-    
     // begin timer interrupts
     timer_int(SCHED_TIME_SLICE_USEC);
 
@@ -36,7 +35,6 @@ pub fn init() {
 }
 
 pub fn sched(trap_frame: &mut TrapFrame) {
-
     let mut sched = SCHED.lock();
 
     if sched.tasks.is_empty() {
@@ -57,7 +55,7 @@ pub fn sched(trap_frame: &mut TrapFrame) {
         match task.state {
             ProcessState::Dead => {
                 let _ = sched.tasks.pop_front();
-            },
+            }
             _ => {}
         }
         sched.tasks.rotate_left(1);
@@ -75,5 +73,4 @@ pub fn sched(trap_frame: &mut TrapFrame) {
     // *trap_frame = task.context;
 
     timer_int(SCHED_TIME_SLICE_USEC);
-    
 }

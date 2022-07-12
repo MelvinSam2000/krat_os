@@ -1,7 +1,6 @@
-use bitflags::bitflags;
-use alloc::string::String;
-
 use core::fmt;
+
+use bitflags::bitflags;
 
 use crate::mm::PageTable;
 
@@ -21,28 +20,26 @@ bitflags! {
     }
 }
 
-impl PteFlags {
-
-    pub fn to_string(&self) -> String {
-        const FLAGS: [char; 8] = ['V','R','W','X','U','G','A','D'];
+impl Into<[char; 8]> for PteFlags {
+    fn into(self) -> [char; 8] {
+        const FLAGS: [char; 8] = ['V', 'R', 'W', 'X', 'U', 'G', 'A', 'D'];
         let mut out = ['-'; 8];
         for i in 0..8 {
             if self.bits & (1 << i) != 0 {
                 out[7 - i] = FLAGS[i];
             }
         }
-        String::from_iter(out)
+        out
     }
 }
 
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct Pte {
-    pub bits: u64
+    pub bits: u64,
 }
 
 impl Pte {
-
     pub fn new() -> Self {
         Self { bits: 0 }
     }
@@ -85,7 +82,11 @@ impl Pte {
 
 impl fmt::Display for Pte {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "PPN: {:#010x}, FLAGS: {:?}", self.ppn(), self.flags().to_string())
+        write!(
+            f,
+            "PPN: {:#010x}, FLAGS: {:?}",
+            self.ppn(),
+            Into::<[char; 8]>::into(self.flags())
+        )
     }
 }
-

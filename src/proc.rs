@@ -16,9 +16,7 @@ pub struct Process {
 }
 
 impl Process {
-
     pub fn spawn(pid: u64) -> Self {
-        
         let mut proc = Process {
             pid,
             context: Default::default(),

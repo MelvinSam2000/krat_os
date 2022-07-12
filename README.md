@@ -35,25 +35,14 @@ cargo run
 - [ ] Userspace library
 - [ ] Userspace programs
 - [ ] Decide monolith or microkernel
-- [ ] Study virtio and file system
 - [ ] Enable multicore
 - [ ] Replace trampoline by mapping entire kernel globally
 
 ### High priority
 
-- [x] Fix timer interrupt
-- [x] Fix PLIC 
-- [x] Better logging
-- [ ] Proper debug logging
-- [x] Basic Syscalls
-- [x] Basic Scheduler
-- [ ] Enable 32 bit compatability
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
+- [ ] Virtio and file system
+- [ ] Enable 32 bit compatibility
+- [ ] Fix release binary
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)

@@ -44,8 +44,8 @@ pub fn claim(context: usize) -> Option<u32> {
         } else {
             Some(claim_num)
         }
-    // log::debug!("CLAIM ADDR: {:#010x}",
-    //     (&(*PLIC_BASE.unwrap()).tc[context].claim as *const u32) as usize);
+        // log::debug!("CLAIM ADDR: {:#010x}",
+        //     (&(*PLIC_BASE.unwrap()).tc[context].claim as *const u32) as usize);
     }
 }
 
@@ -58,16 +58,16 @@ pub fn complete(source: u32, context: usize) {
 pub fn set_threshold(threshold: u32, context: usize) {
     unsafe {
         (*PLIC_BASE.unwrap()).tc[context].threshold = threshold & 0b111;
-    //     log::debug!("THRESHOLD ADDR: {:#010x}",
-    //         (&(*PLIC_BASE.unwrap()).tc[context].threshold as *const u32) as usize);        
+        //     log::debug!("THRESHOLD ADDR: {:#010x}",
+        //         (&(*PLIC_BASE.unwrap()).tc[context].threshold as *const u32) as usize);
     }
 }
 
 pub fn is_pending(source: usize) -> bool {
     unsafe {
-        let out = (*PLIC_BASE.unwrap()).pending[source >> 5] & (1 << (source & 0x1f)) != 0; 
-    //     log::debug!("PENDING ADDR: {:#010x}",
-    //         (&(*PLIC_BASE.unwrap()).pending[source >> 5] as *const u32) as usize);
+        let out = (*PLIC_BASE.unwrap()).pending[source >> 5] & (1 << (source & 0x1f)) != 0;
+        //     log::debug!("PENDING ADDR: {:#010x}",
+        //         (&(*PLIC_BASE.unwrap()).pending[source >> 5] as *const u32) as usize);
         out
     }
 }
@@ -83,7 +83,7 @@ pub fn enable(source: usize, context: usize) {
 pub fn set_priority(source: usize, prio: u32) {
     unsafe {
         (*PLIC_BASE.unwrap()).priority[source] = prio;
-        // log::debug!("PRIORITY ADDR: {:#010x}", 
+        // log::debug!("PRIORITY ADDR: {:#010x}",
         //     (&(*PLIC_BASE.unwrap()).priority[source] as *const u32) as usize);
     }
 }

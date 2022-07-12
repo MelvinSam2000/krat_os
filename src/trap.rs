@@ -1,16 +1,16 @@
-use riscv::register::mtvec::TrapMode;
-
-use core::fmt::Debug;
-use core::arch::asm;
-use alloc::string::String;
 use alloc::format;
+use alloc::string::String;
+use core::arch::asm;
+use core::fmt::Debug;
+
+use riscv::register::mtvec::TrapMode;
 
 use crate::drivers::plic;
 use crate::drivers::uart;
-use crate::uart_print;
+use crate::memlayout::*;
 use crate::sched::sched;
 use crate::syscall::do_syscall;
-use crate::memlayout::*;
+use crate::uart_print;
 
 #[derive(Clone, Copy, Debug, Default)]
 #[repr(C)]
@@ -35,16 +35,14 @@ static mut TRAP_FRAME: TrapFrame = TrapFrame {
 };
 
 pub fn init() {
-
     unsafe {
-
         let sscratch_val = TRAMP_VADDR + (TRAMP_FRAME - TRAMP_VECTOR);
         let fptr = (trap_handler as *const ()) as u64;
-        
+
         // load trap handler function pointer to trap frame
         asm! {
-            "mv     t0, {}", 
-            "mv     t1, {}", 
+            "mv     t0, {}",
+            "mv     t1, {}",
             "sd     t0, 528(t1)",
             in(reg) fptr, in(reg) sscratch_val,
         }
@@ -54,7 +52,7 @@ pub fn init() {
             "csrr   t0, satp",
             "sd     t0, 536(t1)",
         }
-    
+
         // Configure trap vector
         riscv::register::stvec::write(TRAMP_VADDR, TrapMode::Direct);
 
@@ -72,7 +70,6 @@ pub fn init() {
     }
 }
 
-
 #[naked]
 #[no_mangle]
 #[link_section = ".tramp.vector"]
@@ -80,8 +77,9 @@ pub fn init() {
 // Safety:: Is an assembly function
 unsafe extern "C" fn trap_vector() -> ! {
     // asm!(include_str!("asm/trap.asm"), options(noreturn));
-    
-    asm!("
+
+    asm!(
+        "
         // swap sscratch with x31
         csrrw   x31, sscratch, x31
 
@@ -265,11 +263,10 @@ unsafe extern "C" fn trap_vector() -> ! {
         ld      x31, 248(x31)
 
         sret
-    ", options(noreturn));
-    
+    ",
+        options(noreturn)
+    );
 }
-
-
 
 /// This function handles traps. The trap vector
 /// jumps to this function after saving the trap
@@ -277,12 +274,12 @@ unsafe extern "C" fn trap_vector() -> ! {
 /// traps in Rust.
 // #[link_section = ".trampoline.handler"]
 #[no_mangle]
-extern "C"
-fn trap_handler(
+extern "C" fn trap_handler(
     trap_frame: &mut TrapFrame,
-    scause: u64, stval: u64, sstatus: u64,
+    scause: u64,
+    stval: u64,
+    sstatus: u64,
 ) -> u64 {
-
     if log::log_enabled!(log::Level::Debug) {
         let mut msg = String::from("ENTERED TRAP HANDLER...\n");
         msg += &format!("\tstval:     {:#018x}\n", stval);
@@ -301,15 +298,17 @@ fn trap_handler(
                 // Supervisor software interrupt.
                 log::info!("Supervisor software interrupt.");
                 // Safety: Clearing software interrupt bit
-                unsafe { asm! {
-                    "csrci  sip, 1 << 1",
-                }}
-            },
+                unsafe {
+                    asm! {
+                        "csrci  sip, 1 << 1",
+                    }
+                }
+            }
             5 => {
                 // Supervisor timer interrupt.
                 log::debug!("Supervisor timer interrupt.");
                 sched(trap_frame);
-            },
+            }
             9 => {
                 // Supervisor external interrupt.
                 log::debug!("Supervisor external interrupt.");
@@ -322,14 +321,14 @@ fn trap_handler(
                             } else {
                                 uart_print!("{}", c);
                             }
-                        },
+                        }
                         _ => {
                             log::info!("Int ID: {} has no handler.", int_source);
                         }
                     }
                     plic::complete(int_source, 1);
                 }
-            },
+            }
             _ => {
                 panic!("Invalid scause: {:#018x}", scause);
             }
@@ -337,70 +336,69 @@ fn trap_handler(
     } else {
         match cause {
             0 => {
-                // Instruction address misaligned. 
+                // Instruction address misaligned.
                 panic!("Instruction address misaligned.");
-            },
+            }
             1 => {
                 // Instruction access fault.
                 panic!("Instruction access fault.");
-            },
+            }
             2 => {
                 // Illegal instruction.
                 panic!("Illegal instruction.");
-            },
+            }
             3 => {
                 // Breakpoint.
                 log::info!("Breakpoint.");
-            },
+            }
             4 => {
                 // Load address misaligned.
                 panic!("Load address misaligned at {:#010x}", stval);
-            },
+            }
             5 => {
                 // Load access fault.
                 log::error!("Load access fault.");
                 log::error!("Invalid access at {:#010x}", stval);
                 trap_frame.pc += 4;
-            },
+            }
             6 => {
                 // Store/AMO address misaligned.
                 panic!("Store/AMO address misaligned at {:#010x}", stval);
-            },
+            }
             7 => {
                 // Store/AMO access fault.
                 log::error!("Store/AMO access fault.");
                 log::error!("Invalid access at {:#010x}", stval);
                 trap_frame.pc += 4;
-            },
+            }
             8 => {
                 // Environment call from U-mode.
                 log::info!("Environment call from U-mode.");
                 // ra = do_syscall(a7, a0-a6)
-                trap_frame.gregs[1] = do_syscall(
-                    trap_frame.gregs[17], &trap_frame.gregs[10..16]);
-            },
+                trap_frame.gregs[1] = do_syscall(trap_frame.gregs[17], &trap_frame.gregs[10..16]);
+            }
             9 => {
                 // Environment call from S-mode.
                 log::info!("Environment call from S-mode.");
-            },
+            }
             12 => {
                 // Instruction page fault.
                 log::info!("Instruction page fault.");
                 log::info!("Invalid access at {:#010x}", stval);
                 trap_frame.pc += 4;
-            },
+            }
             13 => {
                 // Load page fault.
                 log::info!("Load page fault.");
                 log::info!("Invalid access at {:#010x}", stval);
                 trap_frame.pc += 4;
-            },
+            }
             15 => {
                 // Store/AMO page fault.
                 log::info!("Store/AMO page fault.");
                 log::info!("Invalid access at {:#010x}", stval);
                 trap_frame.pc += 4;
-            },
+            }
             _ => {
                 panic!("Invalid scause: {:#018x}", scause);
             }

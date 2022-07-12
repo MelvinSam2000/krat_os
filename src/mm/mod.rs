@@ -1,6 +1,6 @@
 use crate::memlayout::*;
-use crate::mm::pte::*;
 use crate::mm::addr::*;
+use crate::mm::pte::*;
 use crate::mm::virt::*;
 use crate::riscv::mmu_set;
 
@@ -19,71 +19,89 @@ pub fn init() {
         }
 
         // map kernel text
-        map_range(kern_pt, 
+        map_range(
+            kern_pt,
             VirtAddr::from(TEXT_START),
-            PhysAddr::from(TEXT_START), 
+            PhysAddr::from(TEXT_START),
             PhysAddr::from(TEXT_END),
-            PteFlags::RX);
+            PteFlags::RX,
+        );
 
         // map kernel rodata
-        map_range(kern_pt, 
+        map_range(
+            kern_pt,
             VirtAddr::from(RODATA_START),
-            PhysAddr::from(RODATA_START), 
+            PhysAddr::from(RODATA_START),
             PhysAddr::from(RODATA_END),
-            PteFlags::R);
+            PteFlags::R,
+        );
 
         // map kernel rw data (data and bss)
-        map_range(kern_pt, 
+        map_range(
+            kern_pt,
             VirtAddr::from(DATA_START),
-            PhysAddr::from(DATA_START), 
+            PhysAddr::from(DATA_START),
             PhysAddr::from(BSS_END),
-            PteFlags::RW);
-
+            PteFlags::RW,
+        );
 
         // map trampoline text
-        map_range(kern_pt, 
-            VirtAddr::from(TRAMP_VADDR), 
+        map_range(
+            kern_pt,
+            VirtAddr::from(TRAMP_VADDR),
             PhysAddr::from(TRAMP_VECTOR),
             PhysAddr::from(TRAMP_FRAME - 1),
-            PteFlags::RX | PteFlags::G);
+            PteFlags::RX | PteFlags::G,
+        );
 
         // map trampoline data
-        map_page(kern_pt, 
-            VirtAddr::from(TRAMP_VADDR + (
-                TRAMP_FRAME - TRAMP_VECTOR
-            )), 
+        map_page(
+            kern_pt,
+            VirtAddr::from(TRAMP_VADDR + (TRAMP_FRAME - TRAMP_VECTOR)),
             PhysAddr::from(TRAMP_FRAME),
-            PteFlags::RW | PteFlags::G);
+            PteFlags::RW | PteFlags::G,
+        );
 
         // map kernel heap
-        map_range(kern_pt, 
+        map_range(
+            kern_pt,
             VirtAddr::from(KHEAP_START),
-            PhysAddr::from(KHEAP_START), 
+            PhysAddr::from(KHEAP_START),
             PhysAddr::from(KHEAP_END),
-            PteFlags::RW);
+            PteFlags::RW,
+        );
 
         // map kernel stack
-        map_range(kern_pt, 
+        map_range(
+            kern_pt,
             VirtAddr::from(KSTACK_START),
-            PhysAddr::from(KSTACK_START), 
+            PhysAddr::from(KSTACK_START),
             PhysAddr::from(KSTACK_END),
-            PteFlags::RW);
+            PteFlags::RW,
+        );
 
         // map UART registers
-        map_page(kern_pt, 
-            VirtAddr::from(UART_BASE_ADDR), 
-            PhysAddr::from(UART_BASE_ADDR), 
-            PteFlags::RW);
+        map_page(
+            kern_pt,
+            VirtAddr::from(UART_BASE_ADDR),
+            PhysAddr::from(UART_BASE_ADDR),
+            PteFlags::RW,
+        );
 
         // map PLIC registers
-        map_many(kern_pt,
-            VirtAddr::from(PLIC_BASE_ADDR), 
-            PhysAddr::from(PLIC_BASE_ADDR), 
-            PteFlags::RW, 3);
-        map_page(kern_pt, 
-            VirtAddr::from(PLIC_BASE_ADDR + 0x20_1000), 
-            PhysAddr::from(PLIC_BASE_ADDR + 0x20_1000), 
-            PteFlags::RW);
+        map_many(
+            kern_pt,
+            VirtAddr::from(PLIC_BASE_ADDR),
+            PhysAddr::from(PLIC_BASE_ADDR),
+            PteFlags::RW,
+            3,
+        );
+        map_page(
+            kern_pt,
+            VirtAddr::from(PLIC_BASE_ADDR + 0x20_1000),
+            PhysAddr::from(PLIC_BASE_ADDR + 0x20_1000),
+            PteFlags::RW,
+        );
 
         // turn on MMU
         mmu_set(kern_pt as usize);
@@ -91,7 +109,7 @@ pub fn init() {
     }
 }
 
-pub mod phys;
-pub mod virt;
-pub mod pte;
 pub mod addr;
+pub mod phys;
+pub mod pte;
+pub mod virt;

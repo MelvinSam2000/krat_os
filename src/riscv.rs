@@ -1,12 +1,11 @@
+use core::arch::asm;
+
 use riscv::register::satp::Mode;
 use sbi::timer::set_timer;
 
-use core::arch::asm;
-
 /// Send a timer interrupt "usec" microseconds from now
 pub fn timer_int(usec: usize) {
-
-    let usec = usec*10;
+    let usec = usec * 10;
     let time = riscv::register::time::read().wrapping_add(usec);
     set_timer(time as u64).unwrap();
 }
