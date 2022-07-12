@@ -18,6 +18,6 @@ fdt = "0.1.3"
 spin = "0.9.3"
 lazy_static = { version = "1.4.0", features = [ "spin_no_std" ] }
 log = { version = "0.4.17", features = [
-    "max_level_info", "release_max_level_info"
+    "release_max_level_info"
 ] }
 sbi = "0.2.0"

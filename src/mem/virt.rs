@@ -1,7 +1,9 @@
-use crate::mm::addr::*;
-use crate::mm::phys;
-use crate::mm::pte::*;
-use crate::uart_print;
+use alloc::format;
+use core::fmt::Write;
+
+use crate::mem::addr::*;
+use crate::mem::phys;
+use crate::mem::pte::*;
 
 #[repr(C)]
 pub struct PageTable {
@@ -31,7 +33,7 @@ pub unsafe fn map_page(root: *mut PageTable, va: VirtAddr, pa: PhysAddr, flags: 
 
     if (*pt).entries[vpn[0]].is_valid() {
         panic!(
-            "map_page: Double mapping of page {:#010x} at {:#010x}\n",
+            "map_page: Double mapping of page {:#018x} at {:#018x}\n",
             pt as usize, vpn[0]
         );
     }
@@ -103,13 +105,14 @@ pub unsafe fn map_range(
 
 /// Prints all entries of a given page table.
 pub fn print_pt(pt: *mut PageTable) {
-    uart_print!("PTEs at {:#010x}...\n", pt as usize);
+    let mut debug_pte = format!("PTEs at {:#018x}...\n", pt as usize);
     unsafe { &*pt }
         .entries
         .iter()
         .enumerate()
         .filter(|(_, entry)| entry.is_valid())
-        .for_each(|(i, entry)| log::debug!("\t [{:03}] => PTE <{}>\n", i, entry));
+        .for_each(|(i, entry)| writeln!(debug_pte, "\t [{:03}] => PTE <{}>", i, entry).unwrap());
+    log::debug!("{}", debug_pte);
 }
 
 /// Prints all page tables and their ptes recursively using dfs.

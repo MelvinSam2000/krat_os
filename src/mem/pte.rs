@@ -2,7 +2,7 @@ use core::fmt;
 
 use bitflags::bitflags;
 
-use crate::mm::PageTable;
+use crate::mem::PageTable;
 
 bitflags! {
     pub struct PteFlags: u8 {
@@ -20,10 +20,11 @@ bitflags! {
     }
 }
 
-impl From<PteFlags> for [char; 8] {
+impl From<PteFlags> for [u8; 8] {
     fn from(other: PteFlags) -> Self {
-        const FLAGS: [char; 8] = ['V', 'R', 'W', 'X', 'U', 'G', 'A', 'D'];
-        let mut out = ['-'; 8];
+        
+        const FLAGS: &[u8; 8] = b"VRWXUGAD";
+        let mut out = *b"--------";
         for i in 0..8 {
             if other.bits & (1 << i) != 0 {
                 out[7 - i] = FLAGS[i];
@@ -86,7 +87,7 @@ impl fmt::Display for Pte {
             f,
             "PPN: {:#010x}, FLAGS: {:?}",
             self.ppn(),
-            <[char; 8]>::from(self.flags())
+            core::str::from_utf8(&<[u8; 8]>::from(self.flags())).unwrap()
         )
     }
 }

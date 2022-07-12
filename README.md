@@ -28,6 +28,7 @@ cargo run
 
 ### Low priority
 
+- [ ] Virtio and file system
 - [ ] Fix virtual page deallocation
 - [ ] Implement fdt parser
 - [ ] Refactor code
@@ -36,13 +37,13 @@ cargo run
 - [ ] Userspace programs
 - [ ] Decide monolith or microkernel
 - [ ] Enable multicore
-- [ ] Replace trampoline by mapping entire kernel globally
 
 ### High priority
 
-- [ ] Virtio and file system
 - [ ] Enable 32 bit compatibility
-- [ ] Fix release binary (probably need to replace trap memory scheme)
-
+- [ ] Replace trap handler memory scheme (fix release mode)
+- [ ] Refactor physical page allocator
+- [ ] Add unit tests
+ 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)

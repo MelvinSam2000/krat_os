@@ -35,15 +35,15 @@ pub fn print_sections() -> Option<()> {
     unsafe {
         let mut out = String::from("Memory layout: \n");
         writeln!(out, "=======================================").ok()?;
-        writeln!(out, "TEXT:          {:#010x} .. {:#010x}", TEXT_START, TEXT_END).ok()?;
-        writeln!(out, "TRAMP VECTOR:  {:#010x}", TRAMP_VECTOR).ok()?;
-        writeln!(out, "TRAMP FRAME:   {:#010x}", TRAMP_FRAME).ok()?;
-        writeln!(out, "RODATA:        {:#010x} .. {:#010x}", RODATA_START, RODATA_END).ok()?;
-        writeln!(out, "DATA:          {:#010x} .. {:#010x}", DATA_START, DATA_END).ok()?;
-        writeln!(out, "BSS:           {:#010x} .. {:#010x}", BSS_START, BSS_END).ok()?;
-        writeln!(out, "KHEAP:         {:#010x} .. {:#010x}", KHEAP_START, KHEAP_END).ok()?;
-        writeln!(out, "KSTACK:        {:#010x} .. {:#010x}", KSTACK_START, KSTACK_END).ok()?;
-        writeln!(out, "USER PAGES:    {:#010x} .. {:#010x}", UMEMORY_START, UMEMORY_END).ok()?;
+        writeln!(out, "TEXT:          {:#018x} .. {:#018x}",    TEXT_START, TEXT_END).ok()?;
+        writeln!(out, "TRAMP VECTOR:  {:#018x}",                TRAMP_VECTOR).ok()?;
+        writeln!(out, "TRAMP FRAME:   {:#018x}",                TRAMP_FRAME).ok()?;
+        writeln!(out, "RODATA:        {:#018x} .. {:#018x}",    RODATA_START, RODATA_END).ok()?;
+        writeln!(out, "DATA:          {:#018x} .. {:#018x}",    DATA_START, DATA_END).ok()?;
+        writeln!(out, "BSS:           {:#018x} .. {:#018x}",    BSS_START, BSS_END).ok()?;
+        writeln!(out, "KHEAP:         {:#018x} .. {:#018x}",    KHEAP_START, KHEAP_END).ok()?;
+        writeln!(out, "KSTACK:        {:#018x} .. {:#018x}",    KSTACK_START, KSTACK_END).ok()?;
+        writeln!(out, "USER PAGES:    {:#018x} .. {:#018x}",    UMEMORY_START, UMEMORY_END).ok()?;
         writeln!(out, "=======================================").ok()?;
         log::info!("{}", out);
     }

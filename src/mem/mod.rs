@@ -1,7 +1,7 @@
 use crate::memlayout::*;
-use crate::mm::addr::*;
-use crate::mm::pte::*;
-use crate::mm::virt::*;
+use crate::mem::addr::*;
+use crate::mem::pte::*;
+use crate::mem::virt::*;
 use crate::riscv::mmu_set;
 
 /// Initialize virtual memory.
@@ -102,6 +102,8 @@ pub fn init() {
             PhysAddr::from(PLIC_BASE_ADDR + 0x20_1000),
             PteFlags::RW,
         );
+
+        print_pts_dfs(kern_pt, 2);
 
         // turn on MMU
         mmu_set(kern_pt as usize);

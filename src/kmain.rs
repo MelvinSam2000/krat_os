@@ -59,7 +59,7 @@ extern "C" fn kmain(_hart_id: usize, fdt_ptr: usize) -> ! {
     drivers::plic::init(PLIC_BASE_ADDR);
 
     memlayout::print_sections();
-    mm::init();
+    mem::init();
     trap::init();
     sched::init();
 }
@@ -68,7 +68,7 @@ pub mod drivers;
 pub mod fdt;
 pub mod kheap;
 pub mod memlayout;
-pub mod mm;
+pub mod mem;
 pub mod proc;
 pub mod riscv;
 pub mod sched;
