@@ -5,7 +5,6 @@ use sbi::timer::set_timer;
 
 /// Send a timer interrupt "usec" microseconds from now
 pub fn timer_int(usec: usize) {
-    let usec = usec * 10;
     let time = riscv::register::time::read().wrapping_add(usec);
     set_timer(time as u64).unwrap();
 }

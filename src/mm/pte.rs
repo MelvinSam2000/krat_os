@@ -20,12 +20,12 @@ bitflags! {
     }
 }
 
-impl Into<[char; 8]> for PteFlags {
-    fn into(self) -> [char; 8] {
+impl From<PteFlags> for [char; 8] {
+    fn from(other: PteFlags) -> Self {
         const FLAGS: [char; 8] = ['V', 'R', 'W', 'X', 'U', 'G', 'A', 'D'];
         let mut out = ['-'; 8];
         for i in 0..8 {
-            if self.bits & (1 << i) != 0 {
+            if other.bits & (1 << i) != 0 {
                 out[7 - i] = FLAGS[i];
             }
         }
@@ -33,42 +33,36 @@ impl Into<[char; 8]> for PteFlags {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 #[repr(C)]
-pub struct Pte {
-    pub bits: u64,
-}
+pub struct Pte(pub u64);
 
 impl Pte {
-    pub fn new() -> Self {
-        Self { bits: 0 }
-    }
-
     pub fn from_bits(bits: u64) -> Self {
-        Self { bits }
+        Self(bits)
     }
 
     pub fn ppn(&self) -> u64 {
-        (self.bits >> 10) & 0xfff_ffff_ffff
+        (self.0 >> 10) & 0xfff_ffff_ffff
     }
 
     pub fn flags(&self) -> PteFlags {
-        PteFlags::from_bits(self.bits as u8).unwrap()
+        PteFlags::from_bits(self.0 as u8).unwrap()
     }
 
     pub fn set_ppn(&mut self, ppn: u64) {
-        self.bits &= !(0xfff_ffff_ffff << 10);
-        self.bits |= ppn << 10;
+        self.0 &= !(0xfff_ffff_ffff << 10);
+        self.0 |= ppn << 10;
     }
 
     pub fn set_flags(&mut self, flags: PteFlags) {
         let flags = flags.bits() as u64;
-        self.bits &= !0xff;
-        self.bits |= flags;
+        self.0 &= !0xff;
+        self.0 |= flags;
     }
 
     pub fn clear_flags(&mut self) {
-        self.bits &= !0xff;
+        self.0 &= !0xff;
     }
 
     pub fn pt(&self) -> *mut PageTable {
@@ -80,13 +74,19 @@ impl Pte {
     }
 }
 
+impl From<u64> for Pte {
+    fn from(bits: u64) -> Self {
+        Self(bits)
+    }
+}
+
 impl fmt::Display for Pte {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
             "PPN: {:#010x}, FLAGS: {:?}",
             self.ppn(),
-            Into::<[char; 8]>::into(self.flags())
+            <[char; 8]>::from(self.flags())
         )
     }
 }

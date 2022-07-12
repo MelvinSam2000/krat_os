@@ -1,7 +1,7 @@
-use alloc::format;
 use alloc::string::String;
 use core::arch::asm;
 use core::fmt::Debug;
+use core::fmt::Write;
 
 use riscv::register::mtvec::TrapMode;
 
@@ -282,9 +282,9 @@ extern "C" fn trap_handler(
 ) -> u64 {
     if log::log_enabled!(log::Level::Debug) {
         let mut msg = String::from("ENTERED TRAP HANDLER...\n");
-        msg += &format!("\tstval:     {:#018x}\n", stval);
-        msg += &format!("\tscause:    {:#018x}\n", scause);
-        msg += &format!("\tsstatus:   {:#018x}\n", sstatus);
+        writeln!(msg, "\tstval:     {:#018x}\n", stval).unwrap();
+        writeln!(msg, "\tscause:    {:#018x}\n", scause).unwrap();
+        writeln!(msg, "\tsstatus:   {:#018x}\n", sstatus).unwrap();
         log::debug!("{}", msg);
         //log::info!("trap:   {:#018x?}", trap_frame);
     }

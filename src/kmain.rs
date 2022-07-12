@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 #![feature(alloc_error_handler, fn_align, naked_functions)]
+#![allow(clippy::not_unsafe_ptr_arg_deref)]
 
 extern crate alloc;
 
@@ -10,6 +11,7 @@ use core::arch::global_asm;
 use core::panic::PanicInfo;
 
 use crate::memlayout::*;
+use crate::utils::logger;
 
 global_asm!(include_str!("asm/boot.asm"));
 global_asm!(include_str!("asm/mem.asm"));
@@ -24,6 +26,7 @@ extern "C" fn panic_handler(info: &PanicInfo) -> ! {
     log::error!("{}", info);
     loop {
         // Safety: Disabling interrupts and "halting" processor safely
+        // Kernel termination therefore anything after this does not matter
         unsafe {
             asm! {
                 "csrci  sstatus, 1 << 1",
@@ -47,7 +50,7 @@ fn alloc_error_handler(layout: Layout) -> ! {
 /// function to be called when the kernel
 /// enters Rust.
 #[no_mangle]
-extern "C" fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
+extern "C" fn kmain(_hart_id: usize, fdt_ptr: usize) -> ! {
     drivers::uart::init(UART_BASE_ADDR);
     logger::init();
     kheap::init();
@@ -58,16 +61,12 @@ extern "C" fn kmain(_hart_id: u64, fdt_ptr: u64) -> ! {
     memlayout::print_sections();
     mm::init();
     trap::init();
-
     sched::init();
-    loop {}
 }
 
 pub mod drivers;
 pub mod fdt;
 pub mod kheap;
-pub mod logger;
-pub mod macros;
 pub mod memlayout;
 pub mod mm;
 pub mod proc;
@@ -75,3 +74,4 @@ pub mod riscv;
 pub mod sched;
 pub mod syscall;
 pub mod trap;
+pub mod utils;

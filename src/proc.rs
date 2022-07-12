@@ -1,6 +1,6 @@
 use crate::trap::TrapFrame;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub enum ProcessState {
     Creating,
     Ready,

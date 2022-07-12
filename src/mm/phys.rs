@@ -1,5 +1,5 @@
-use alloc::format;
 use alloc::string::String;
+use core::fmt::Write;
 
 use crate::memlayout::UMEMORY_END;
 use crate::memlayout::UMEMORY_START;
@@ -7,7 +7,7 @@ use crate::memlayout::UMEMORY_START;
 #[repr(C, align(4096))]
 struct FreeListNode {
     next: Option<*mut FreeListNode>,
-    _padding: [u8; 4088],
+    _padding: [u8; 4096 - 8],
 }
 
 struct PageAllocator {
@@ -41,43 +41,46 @@ pub fn init() {
 }
 
 /// Allocate a page.
-pub unsafe fn alloc() -> *mut u8 {
-    if let Some(head) = ALLOC.free_list_head {
-        ALLOC.free_list_head = (*head).next;
-        ALLOC.total_allocated += 1;
-        // clear page
-        clear_page(((head as usize) >> 12) << 12);
-        return head as *mut u8;
-    } else {
-        panic!("Cannot allocated more pages.");
+pub fn alloc() -> *mut u8 {
+    unsafe {
+        if let Some(head) = ALLOC.free_list_head {
+            ALLOC.free_list_head = (*head).next;
+            ALLOC.total_allocated += 1;
+            // clear page
+            clear_page(((head as usize) >> 12) << 12);
+            head as *mut u8
+        } else {
+            panic!("Cannot allocated more pages.");
+        }
     }
 }
 
 /// Deallocate a page.
-pub unsafe fn dealloc(page_ptr: *mut u8) {
+pub fn dealloc(page_ptr: *mut u8) {
     let page_ptr = page_ptr as *mut FreeListNode;
-    if let Some(head) = ALLOC.free_list_head {
-        (*head).next = Some(head);
+    unsafe {
+        if let Some(head) = ALLOC.free_list_head {
+            (*head).next = Some(head);
+        }
+        ALLOC.total_allocated -= 1;
+        ALLOC.free_list_head = Some(page_ptr);
     }
-    ALLOC.total_allocated -= 1;
-    ALLOC.free_list_head = Some(page_ptr);
 }
 
 // Fill page with zero
-unsafe fn clear_page(ptr: usize) {
+fn clear_page(ptr: usize) {
     for i in 0..512 {
-        *((ptr + 8 * i) as *mut u64) = 0;
+        *unsafe { &mut *((ptr + 8 * i) as *mut u64) } = 0;
     }
 }
 
-#[cfg(debug_assertions)]
 pub unsafe fn print_free_list() {
     let mut tmp = ALLOC.free_list_head;
     let mut out = String::from("");
     let iter = 30;
     let mut i = 0;
     while tmp.is_some() && i < iter {
-        out += &format!("{:#010x} -> ", tmp.unwrap() as usize);
+        write!(out, "{:#010x} -> ", tmp.unwrap() as usize).unwrap();
         tmp = (*tmp.unwrap()).next;
         i += 1;
     }

@@ -1,11 +1,11 @@
-use alloc::format;
 use alloc::string::String;
+use core::fmt::Write;
 
 use fdt::Fdt;
 
 use crate::memlayout::UMEMORY_END;
 
-pub fn init(fdt_ptr: u64) {
+pub fn init(fdt_ptr: usize) {
     // Safety: Using external crate fdt, passing SBI parameter
     let fdt = unsafe { Fdt::from_ptr(fdt_ptr as *const u8).unwrap() };
 
@@ -13,13 +13,12 @@ pub fn init(fdt_ptr: u64) {
 }
 
 /// Print device tree information.
-// #[cfg(debug_assertions)]
 fn print_fdt(fdt: &Fdt) {
     let soc = fdt.find_node("/soc");
     if let Some(soc) = soc {
         let mut msg = String::from("FDT Nodes:\n");
         for child in soc.children() {
-            msg += &format!("\t{}\n", child.name);
+            writeln!(msg, "\t{}", child.name).unwrap();
         }
         log::info!("{}", msg);
     }

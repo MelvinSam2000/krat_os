@@ -65,10 +65,9 @@ pub fn set_threshold(threshold: u32, context: usize) {
 
 pub fn is_pending(source: usize) -> bool {
     unsafe {
-        let out = (*PLIC_BASE.unwrap()).pending[source >> 5] & (1 << (source & 0x1f)) != 0;
+        (*PLIC_BASE.unwrap()).pending[source >> 5] & (1 << (source & 0x1f)) != 0
         //     log::debug!("PENDING ADDR: {:#010x}",
         //         (&(*PLIC_BASE.unwrap()).pending[source >> 5] as *const u32) as usize);
-        out
     }
 }
 

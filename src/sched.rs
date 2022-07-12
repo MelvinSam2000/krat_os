@@ -22,52 +22,59 @@ lazy_static! {
     };
 }
 
-pub fn init() {
+#[allow(clippy::empty_loop)]
+pub fn init() -> ! {
+    // Push some tasks
+    let mut sched = SCHED.lock();
+    let tasks = &mut sched.tasks;
+    tasks.push_back(Process::spawn(0));
+    tasks.push_back(Process::spawn(1));
+    tasks.push_back(Process::spawn(2));
+    // Must unlock scheduler mutex before timer interrupts start
+    drop(sched);
+
     // begin timer interrupts
+    log::info!("Scheduler initialized.");
     timer_int(SCHED_TIME_SLICE_USEC);
 
-    SCHED.lock().tasks.push_front(Process::spawn(0));
-    SCHED.lock().tasks.push_front(Process::spawn(1));
-    SCHED.lock().tasks.push_front(Process::spawn(2));
-
-    log::info!("Scheduler initialized.");
     loop {}
 }
 
 pub fn sched(trap_frame: &mut TrapFrame) {
     let mut sched = SCHED.lock();
+    let tasks = &mut sched.tasks;
 
-    if sched.tasks.is_empty() {
+    if tasks.is_empty() {
         log::info!("No tasks to schedule...");
         timer_int(SCHED_TIME_SLICE_USEC);
         return;
     }
 
     // stop current process
-    let mut task = sched.tasks.front_mut().unwrap();
+    let mut task = tasks.front_mut().unwrap();
     task.state = ProcessState::Ready;
     task.context = *trap_frame;
-    sched.tasks.rotate_left(1);
+    tasks.rotate_left(1);
 
     // get next ready process
-    while sched.tasks.front().unwrap().state != ProcessState::Ready {
-        let task = sched.tasks.front().unwrap();
+    while tasks.front().unwrap().state != ProcessState::Ready {
+        let task = tasks.front().unwrap();
         match task.state {
             ProcessState::Dead => {
-                let _ = sched.tasks.pop_front();
+                tasks.pop_front();
             }
-            _ => {}
+            _ => unimplemented!(),
         }
-        sched.tasks.rotate_left(1);
+        tasks.rotate_left(1);
     }
 
-    if sched.tasks.is_empty() {
+    if tasks.is_empty() {
         timer_int(SCHED_TIME_SLICE_USEC);
         return;
     }
 
     // switch to new task
-    let mut task = sched.tasks.front_mut().unwrap();
+    let mut task = tasks.front_mut().unwrap();
     log::info!("Scheduling process {}", task.pid);
     task.state = ProcessState::Running;
     // *trap_frame = task.context;

@@ -6,7 +6,7 @@ Currently targets the RV64GC ISA, and the QEMU virt machine. May support other R
 
 ## Installation
 
-Cargo, as well as qemu RISC-V are required. 
+Cargo, as well as Qemu RISC-V are required. 
 
 Will update this later...
 
@@ -42,7 +42,7 @@ cargo run
 
 - [ ] Virtio and file system
 - [ ] Enable 32 bit compatibility
-- [ ] Fix release binary
+- [ ] Fix release binary (probably need to replace trap memory scheme)
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)

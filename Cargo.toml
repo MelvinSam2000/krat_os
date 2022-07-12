@@ -1,10 +1,10 @@
 [package]
-name = "krat_os"
+name = "krat-os"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "kmain"
+name = "krat-os"
 path = "src/kmain.rs"
 test = false
 bench = false

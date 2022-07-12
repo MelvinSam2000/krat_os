@@ -12,7 +12,7 @@ pub struct PageTable {
 /// the page table entries from the root provided.
 pub unsafe fn map_page(root: *mut PageTable, va: VirtAddr, pa: PhysAddr, flags: PteFlags) {
     let vpn = va.vpn();
-    let mut pte = Pte::new();
+    let mut pte = Pte::default();
     let mut pt = root;
 
     for lvl in (1..=2).rev() {
@@ -75,17 +75,15 @@ pub unsafe fn va_to_pa(root: *mut PageTable, va: VirtAddr) -> PhysAddr {
 /// number of pages.
 pub unsafe fn map_many(
     root: *mut PageTable,
-    va: VirtAddr,
-    pa: PhysAddr,
+    mut va: VirtAddr,
+    mut pa: PhysAddr,
     flags: PteFlags,
     num: u64,
 ) {
-    let mut pa = pa;
-    let mut va = va;
     for _ in 0..num {
         map_page(root, va, pa, flags);
         pa.set_ppn(pa.ppn() + 1);
-        va = VirtAddr::from(va.bits + 0x1000);
+        va = VirtAddr::from(va.0 + 0x1000);
     }
 }
 
@@ -104,26 +102,25 @@ pub unsafe fn map_range(
 }
 
 /// Prints all entries of a given page table.
-#[cfg(debug_assertions)]
-pub unsafe fn print_pt(pt: *mut PageTable) {
+pub fn print_pt(pt: *mut PageTable) {
     uart_print!("PTEs at {:#010x}...\n", pt as usize);
-    for (i, entry) in (*pt).entries.iter().enumerate() {
-        if entry.is_valid() {
-            uart_print!("\t [{:03}] => PTE <{}>\n", i, entry);
-        }
-    }
+    unsafe { &*pt }
+        .entries
+        .iter()
+        .enumerate()
+        .filter(|(_, entry)| entry.is_valid())
+        .for_each(|(i, entry)| log::debug!("\t [{:03}] => PTE <{}>\n", i, entry));
 }
 
 /// Prints all page tables and their ptes recursively using dfs.
-#[cfg(debug_assertions)]
-pub unsafe fn print_pts_dfs(pt: *mut PageTable, lvl: u8) {
+pub fn print_pts_dfs(pt: *mut PageTable, lvl: u8) {
     print_pt(pt);
     if lvl == 0 || lvl > 2 {
         return;
     }
-    for entry in (*pt).entries.iter() {
-        if entry.is_valid() {
-            print_pts_dfs((entry.ppn() << 12) as *mut PageTable, lvl - 1);
-        }
-    }
+    unsafe { &*pt }
+        .entries
+        .iter()
+        .filter(|entry| entry.is_valid())
+        .for_each(|entry| print_pts_dfs((entry.ppn() << 12) as *mut PageTable, lvl - 1));
 }
