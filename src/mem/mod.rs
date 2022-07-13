@@ -16,6 +16,7 @@ pub fn init() {
         if kern_pt.is_null() {
             panic!("Unable to allocate kernel root page table.");
         }
+        let kern_pt = &mut *kern_pt;
 
         // Number of 4KB pages required per section
         let text_pages = ((TEXT_END - TEXT_START) >> 12) + 1;
@@ -103,7 +104,7 @@ pub fn init() {
         print_pts_dfs(kern_pt, 2);
 
         // turn on MMU
-        mmu_init(kern_pt as usize);
+        mmu_init((kern_pt as *const PageTable) as usize);
         log::debug!("Virtual memory initialized.");
     }
 }
