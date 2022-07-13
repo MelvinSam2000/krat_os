@@ -1,4 +1,5 @@
 use core::fmt;
+use core::str;
 
 use bitflags::bitflags;
 
@@ -17,12 +18,15 @@ bitflags! {
         const RW = Self::R.bits | Self::W.bits;
         const RX = Self::R.bits | Self::X.bits;
         const RWX = Self::R.bits | Self::W.bits | Self::X.bits;
+        const GR = Self::G.bits | Self::R.bits;
+        const GRW = Self::G.bits | Self::R.bits | Self::W.bits;
+        const GRX = Self::G.bits | Self::R.bits | Self::X.bits;
+        const GRWX = Self::G.bits | Self::R.bits | Self::W.bits | Self::X.bits;
     }
 }
 
 impl From<PteFlags> for [u8; 8] {
     fn from(other: PteFlags) -> Self {
-        
         const FLAGS: &[u8; 8] = b"VRWXUGAD";
         let mut out = *b"--------";
         for i in 0..8 {
@@ -83,11 +87,12 @@ impl From<u64> for Pte {
 
 impl fmt::Display for Pte {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "PPN: {:#010x}, FLAGS: {:?}",
-            self.ppn(),
-            core::str::from_utf8(&<[u8; 8]>::from(self.flags())).unwrap()
-        )
+        write!(f, "PPN: {:#018x}, FLAGS: {}", self.ppn(), self.flags())
+    }
+}
+
+impl fmt::Display for PteFlags {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", str::from_utf8(&<[u8; 8]>::from(*self)).unwrap())
     }
 }

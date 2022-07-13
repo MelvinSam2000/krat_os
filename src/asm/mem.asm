@@ -47,9 +47,3 @@ UMEMORY_START: .dword _umemory_start
 
 .global GLOBAL_POINTER
 GLOBAL_POINTER: .dword _global_pointer
-
-.global TRAMP_VECTOR
-TRAMP_VECTOR: .dword _tramp_vector
-
-.global TRAMP_FRAME
-TRAMP_FRAME: .dword _tramp_frame

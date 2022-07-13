@@ -10,7 +10,7 @@ struct KernelLogger;
 
 impl Log for KernelLogger {
     fn enabled(&self, metadata: &Metadata) -> bool {
-        metadata.level() <= Level::Trace
+        metadata.level() <= Level::Debug
     }
 
     fn log(&self, record: &Record) {
@@ -18,7 +18,6 @@ impl Log for KernelLogger {
             uart_print!(
                 "[{}] [{}] {}\n",
                 record.level(),
-                // record.module_path().unwrap(),
                 record.target(),
                 record.args()
             );

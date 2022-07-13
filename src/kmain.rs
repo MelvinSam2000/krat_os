@@ -15,6 +15,7 @@ use crate::utils::logger;
 
 global_asm!(include_str!("asm/boot.asm"));
 global_asm!(include_str!("asm/mem.asm"));
+global_asm!(include_str!("asm/trap.asm"));
 
 /// Whenever there is a fatal kernel panic,
 /// this function is called. It also prints
@@ -67,8 +68,8 @@ extern "C" fn kmain(_hart_id: usize, fdt_ptr: usize) -> ! {
 pub mod drivers;
 pub mod fdt;
 pub mod kheap;
-pub mod memlayout;
 pub mod mem;
+pub mod memlayout;
 pub mod proc;
 pub mod riscv;
 pub mod sched;

@@ -9,6 +9,10 @@ path = "src/kmain.rs"
 test = false
 bench = false
 
+[profile.release]
+lto = true
+codegen-units = 1
+
 [dependencies]
 riscv = "0.8.0"
 uart_16550 = "0.2.18"

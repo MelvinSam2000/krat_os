@@ -9,8 +9,8 @@ pub fn timer_int(usec: usize) {
     set_timer(time as u64).unwrap();
 }
 
-/// Set MMU
-pub fn mmu_set(addr: usize) {
+/// Set MMU and immediately update PC register to match the same virtual address
+pub fn mmu_init(addr: usize) {
     // Safety: Setting SATP register and flushing TLB
     unsafe {
         riscv::register::satp::set(Mode::Sv39, 0, (addr as usize) >> 12);

@@ -15,7 +15,6 @@ entry:
     // clear bss section
     call    clear_bss
     
-
     // go to Rust (kmain)
     call    kmain
 

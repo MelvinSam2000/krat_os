@@ -1,4 +1,5 @@
 use alloc::collections::vec_deque::VecDeque;
+use core::arch::asm;
 
 use lazy_static::lazy_static;
 use spin::Mutex;
@@ -22,7 +23,6 @@ lazy_static! {
     };
 }
 
-#[allow(clippy::empty_loop)]
 pub fn init() -> ! {
     // Push some tasks
     let mut sched = SCHED.lock();
@@ -37,7 +37,14 @@ pub fn init() -> ! {
     log::info!("Scheduler initialized.");
     timer_int(SCHED_TIME_SLICE_USEC);
 
-    loop {}
+    loop {
+        unsafe {
+            asm! {
+                "csrci  sstatus, 1 << 1",
+                "wfi",
+            }
+        }
+    }
 }
 
 pub fn sched(trap_frame: &mut TrapFrame) {

@@ -33,14 +33,21 @@ pub unsafe fn map_page(root: *mut PageTable, va: VirtAddr, pa: PhysAddr, flags: 
 
     if (*pt).entries[vpn[0]].is_valid() {
         panic!(
-            "map_page: Double mapping of page {:#018x} at {:#018x}\n",
-            pt as usize, vpn[0]
+            "map_page: Double mapping, va:{:#018x} -> pa:{:#018x} {}\n",
+            va.0, pa.0, flags
         );
     }
 
     pte.set_ppn(pa.ppn());
     pte.set_flags(flags | PteFlags::V);
     (*pt).entries[vpn[0]] = pte;
+
+    log::debug!(
+        "MAP SUCCESS: va:{:#018x} -> pa:{:018x} {}",
+        va.0,
+        pa.0,
+        pte.flags()
+    );
 }
 
 /// Unmap a virtual address from the page table.
@@ -80,7 +87,7 @@ pub unsafe fn map_many(
     mut va: VirtAddr,
     mut pa: PhysAddr,
     flags: PteFlags,
-    num: u64,
+    num: usize,
 ) {
     for _ in 0..num {
         map_page(root, va, pa, flags);
@@ -100,7 +107,7 @@ pub unsafe fn map_range(
     flags: PteFlags,
 ) {
     let n = pa_f.ppn() - pa_i.ppn() + 1;
-    map_many(root, va, pa_i, flags, n as u64);
+    map_many(root, va, pa_i, flags, n as usize);
 }
 
 /// Prints all entries of a given page table.

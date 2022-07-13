@@ -80,7 +80,7 @@ pub unsafe fn print_free_list() {
     let iter = 30;
     let mut i = 0;
     while tmp.is_some() && i < iter {
-        write!(out, "{:#010x} -> ", tmp.unwrap() as usize).unwrap();
+        write!(out, "{:#018x} -> ", tmp.unwrap() as usize).unwrap();
         tmp = (*tmp.unwrap()).next;
         i += 1;
     }

@@ -1,4 +1,4 @@
-OUTPUT_ARCH("riscv")
+OUTPUT_ARCH("riscv64gc")
 ENTRY(entry)
 
 MEM_SIZE = 256M;
@@ -27,15 +27,6 @@ SECTIONS
         PROVIDE(_text_start = .);
         KEEP(*(.text.init))
         *(.text .text.*)
-
-        . = ALIGN(4096);
-        PROVIDE(_tramp_vector = .);
-        KEEP(*(.tramp.vector))
-        
-        . = ALIGN(4096);
-        PROVIDE(_tramp_frame = .);
-        KEEP(*(.tramp.frame))
-
         PROVIDE(_text_end = .);
     } >RAM AT>RAM :text
 
