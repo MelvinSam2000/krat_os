@@ -5,9 +5,9 @@
 trap_vector:
 
    // swap sscratch with x31
-    csrrw   x31, sscratch, x31
+   csrrw   x31, sscratch, x31
 
-    // store general purpose registers into trap frame (except x31)
+   // store general purpose registers into trap frame (except x31)
     sd      x1, 8(x31)
     sd      x2, 16(x31)
     sd      x3, 24(x31)
@@ -93,26 +93,15 @@ trap_vector:
     csrr    a2, stval
     csrr    a3, sstatus
 
-    // swap to kernel pages
-    ld      t0, 536(x31)
-    csrw    satp, t0
-    // sfence.vma
-
     // restore sscratch
     mv      t0, x31      
     csrrw   x31, sscratch, x31
 
     // enter Rust trap_handler
-    ld      t0, 528(t0)
-    jalr    t0
+    call    trap_handler
 
     // get sscratch
     csrr    x31, sscratch
-
-    // swap to user pages
-    ld      t0, 520(x31)
-    csrw    satp, t0
-    // sfence.vma
 
     // update return pc
     csrw    sepc, a0

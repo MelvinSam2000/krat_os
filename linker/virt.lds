@@ -22,7 +22,7 @@ SECTIONS
 {
     PROVIDE(_memory_start = ORIGIN(RAM));
 
-    .text : ALIGN(8)
+    .text : ALIGN(4096)
     {
         PROVIDE(_text_start = .);
         KEEP(*(.text.init))
@@ -36,6 +36,7 @@ SECTIONS
         PROVIDE(_rodata_start = .);
         *(.rodata .rodata.*)
         *(.srodata .srodata.*)
+        *(.eh_frame .eh_frame.*)
         PROVIDE(_rodata_end = .);
     } >RAM AT>RAM :rodata
 

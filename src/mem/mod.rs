@@ -8,7 +8,7 @@ use crate::riscv::mmu_init;
 /// 2. Create kernel root page table.
 /// 3. Create page mmapings for kernel memory regions and mmio devices.
 /// 4. Store kernel page table in satp and turn on MMU
-pub fn init() {
+pub fn init() -> ! {
     unsafe {
         // initialize kernel root page table
         phys::init();
@@ -26,7 +26,9 @@ pub fn init() {
         let kstack_pages = ((KSTACK_END - KSTACK_START) >> 12) + 1;
 
         // Virtual memory address offsets
-        let kern_vaddr_base = !0usize - (KSTACK_END - TEXT_START);
+        //let kern_vaddr_base = !0usize - (KSTACK_END - TEXT_START);
+        let kern_vaddr_base = !0usize - (1024*1024 - 1);
+        // let kern_vaddr_base = TEXT_START;
         let text_vaddr_base = kern_vaddr_base;
         let rodata_vaddr_base = text_vaddr_base + (text_pages << 12);
         let data_bss_vaddr_base = rodata_vaddr_base + (rodata_pages << 12);
@@ -105,7 +107,6 @@ pub fn init() {
 
         // turn on MMU
         mmu_init((kern_pt as *const PageTable) as usize);
-        log::debug!("Virtual memory initialized.");
     }
 }
 

@@ -41,7 +41,7 @@ cargo run
 ### High priority
 
 - [ ] Enable 32 bit compatibility
-- [ ] Replace trap handler memory scheme (fix release mode)
+- [ ] Replace trap handler memory scheme
 - [ ] Refactor physical page allocator
 - [ ] Add unit tests
  

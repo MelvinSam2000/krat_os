@@ -22,8 +22,6 @@ pub struct TrapFrame {
     pub fregs: [usize; 32],
     pub pc: usize,
     pub satp: usize,
-    pub trap_handler_ptr: usize,
-    pub kern_satp: usize,
 }
 
 static mut TRAP_FRAME: TrapFrame = TrapFrame {
@@ -31,8 +29,6 @@ static mut TRAP_FRAME: TrapFrame = TrapFrame {
     fregs: [0; 32],
     pc: 0,
     satp: 0,
-    trap_handler_ptr: 0,
-    kern_satp: 0,
 };
 
 pub fn init() {
@@ -46,7 +42,7 @@ pub fn init() {
         // Store trap frame into sscratch
         riscv::register::sscratch::write((&TRAP_FRAME as *const _) as usize);
 
-        TRAP_FRAME.kern_satp = riscv::register::satp::read().bits();
+        TRAP_FRAME.satp = riscv::register::satp::read().bits();
 
         // Enable interrupts
         asm! {

@@ -25,9 +25,9 @@ global_asm!(include_str!("asm/trap.asm"));
 extern "C" fn panic_handler(info: &PanicInfo) -> ! {
     log::error!("FATAL - Kernel Panic:");
     log::error!("{}", info);
+    // Safety: Disabling interrupts and "halting" processor safely
+    // Kernel termination therefore anything after this does not matter
     loop {
-        // Safety: Disabling interrupts and "halting" processor safely
-        // Kernel termination therefore anything after this does not matter
         unsafe {
             asm! {
                 "csrci  sstatus, 1 << 1",
@@ -61,6 +61,10 @@ extern "C" fn kmain(_hart_id: usize, fdt_ptr: usize) -> ! {
 
     memlayout::print_sections();
     mem::init();
+}
+
+#[no_mangle]
+fn kmain_end(_hart_id: usize) -> ! {
     trap::init();
     sched::init();
 }

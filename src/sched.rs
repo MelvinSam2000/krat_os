@@ -35,12 +35,11 @@ pub fn init() -> ! {
 
     // begin timer interrupts
     log::info!("Scheduler initialized.");
-    timer_int(SCHED_TIME_SLICE_USEC);
+    // timer_int(SCHED_TIME_SLICE_USEC);
 
     loop {
         unsafe {
             asm! {
-                "csrci  sstatus, 1 << 1",
                 "wfi",
             }
         }
